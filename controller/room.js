@@ -17,12 +17,13 @@ async function createRoom({ name, password, creator }) {
     const room_slug = generateRoomSlug();
     
     const password_hash = await bcrypt.hash(password, options.BCRYPT_SALT_ROUNDS);
+    console.log(password);
 
     const room = {
         id: room_id,
         slug: room_slug,
         name,
-        password: password_hash,
+        password: password? password_hash : undefined, 
         creator,
         users: new Set(),
     };
@@ -48,9 +49,11 @@ function getRoom(room_slug) {
 }
 
 function deleteRoom() {
+
 }
 
 module.exports = {
     createRoom,
-    getRoom
+    getRoom,
+    joinRoom
 };

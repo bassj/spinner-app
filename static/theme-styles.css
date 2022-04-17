@@ -43,14 +43,49 @@ h2 {
 form#main-form {
     display: flex;
     flex-direction: column;
-    position: absolute;
-
+   
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+  
+    min-height: 500px;
+}
+
+dialog#auth-dialog {
+    min-height: 250px;
+    border-width: 0px;
+    color: white;
+}
+
+dialog:not([open]) {
+    display: none !important;
+}
+
+dialog#auth-dialog .error-message {
+    color: #dc2f3f;
+}
+
+dialog#auth-dialog form {
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+    height: 100%;
+    flex-grow: 1;
+}
+
+dialog#auth-dialog input[type="submit"] {
+    margin-top: auto;
+    margin-bottom: 2rem;
+}
+
+form#main-form, dialog#auth-dialog {
+    display: flex;
+    flex-direction: column;
+
+    position: absolute;
 
     width: 375px;
-    min-height: 500px;
 
     background-image: linear-gradient(135deg, rgb(122, 121, 121) 0%, rgb(150, 150, 150) 87%); 
     border-radius: 15px;
@@ -58,10 +93,11 @@ form#main-form {
     box-shadow:
       1.9px 2.7px 58px -38px rgba(0, 0, 0, 0.04),
       6.5px 9.2px 74.3px -38px rgba(0, 0, 0, 0.06),
-      29px 41px 131px -38px rgba(0, 0, 0, 0.1);
+      29px 41px 131px -38px rgba(0, 0, 0, 0.1),
+      inset 0px 0px 6px 0px rgba(255, 255, 255, 0.25);
 }
 
-form#main-form label {
+form label {
     display: block;
 
     margin: 1.5rem;
@@ -70,7 +106,7 @@ form#main-form label {
     font-weight: 500;
 }
 
-form#main-form input[type="text"], form#main-form input[type="password"] {
+form input[type="text"], form input[type="password"] {
     display: block;
 
     width: 100%;
@@ -90,7 +126,7 @@ form#main-form input[type="text"], form#main-form input[type="password"] {
 
 }
 
-form#main-form input[type="text"]:focus, form#main-form input[type="password"]:focus {
+form input[type="text"]:focus, form input[type="password"]:focus {
     outline: 0px;
 }
 
@@ -99,7 +135,7 @@ form#main-form .submit-container {
     margin-top: auto;
 }
 
-form#main-form input[type="submit"] {
+form input[type="submit"] {
     display: block;
 
     width: 100%;
@@ -114,7 +150,7 @@ form#main-form input[type="submit"] {
     color: white;
 
     border: 0px;
-    border-radius: 5px;
+    border-radius: 10px;
 
     font-family: 'Montserrat', sans-serif;
     font-size: 1rem;
@@ -124,12 +160,12 @@ form#main-form input[type="submit"] {
     transition: 0.1s filter, 0.1s box-shadow, 0.1s transform;
 }
 
-form#main-form input[type="submit"]:hover {
+form input[type="submit"]:hover {
     cursor: pointer;
     filter: brightness(1.05);
 }
 
-form#main-form input[type="submit"]:active {
+form input[type="submit"]:active {
     box-shadow: 0px 0px 0px 0px #1d8033;
     transform: translateY(5px);
 }

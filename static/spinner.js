@@ -15,7 +15,7 @@ class SpinnerWheel extends HTMLElement {
     };
 
     lastPegDist = 0;
-    lastAnim = 0;
+    lastAnim = Date.now();
     angularAccel = 0;
     angularVelocity = 0;
     rotation = 0;
@@ -42,7 +42,10 @@ class SpinnerWheel extends HTMLElement {
     }
 
     get delta() {
-        return (Date.now() - this.lastAnim) / 1000;
+        return ((Date.now() - this.lastAnim) / 1000).toFixed(6);
+    }
+
+    doPhys() {
     }
 
     doAnim() {
@@ -61,16 +64,16 @@ class SpinnerWheel extends HTMLElement {
 
             this.angularVelocity *= 0.95;
             const delta = deltas.reduce((min, val) => (Math.abs(val) < Math.abs(min) ? val : min), Number.MAX_VALUE);
-            this.angularVelocity += delta / Math.PI * 30 * (1/60); 
+            this.angularVelocity += delta / Math.PI * 120 * this.delta; 
         } else {
             this.angularVelocity *= 0.998;
         }
 
-        this.lastAnim = Date.now();
-        this.rotation += this.angularVelocity * (1 / 60);
+        this.rotation += this.angularVelocity * this.delta;
         this.svg.style.transform = `rotateZ(${this.rotation}rad)`;
         this.updatePegShadows();
         this.updateTickerRotation();
+        this.lastAnim = Date.now();
 
         requestAnimationFrame(() => {
             this.doAnim();
@@ -163,7 +166,7 @@ class SpinnerWheel extends HTMLElement {
 
             this.ticker.rotation = ((pegDist > 0)? 1 : -1) * fac * 0.3;
             this.angularVelocity *= 0.996;
-            this.angularVelocity += (((pegDist < 0)? -1:1) * fac * (1 / 60));
+            this.angularVelocity += (((pegDist < 0)? -1:1) * fac * this.delta);
        }
 
        this.lastPegDist = pegDist;

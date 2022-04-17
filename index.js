@@ -1,13 +1,16 @@
-const cookieParser = require('cookie-parser');
+const expressWS     = require('express-ws');
 const express       = require('express');
 const session       = require('express-session');
 const csurf         = require('csurf');
+const https         = require('https');
+const http          = require('http');
 
 const app = express();
+const ws  = expressWS(app);
 
 const options = require('./options');
 
-const csrf = csurf({ cookie: true });
+const csrf = csurf({ cookie: false });
 
 app.use(session({
     secret: options.SECRET,
@@ -16,16 +19,15 @@ app.use(session({
     resave: false,
 }));
 
-app.use(cookieParser());
-
 app.set('trust proxy', options.TRUST_PROXY? 1:0);
 
 app.set('view engine', 'ejs');
 app.use('/static', express.static('static'));
-app.use(express.urlencoded({ extended: false }));
-app.use('/room', require('./routes/room.js')(csrf));
+app.use(express.urlencoded({ extended: true }));
+app.use(csrf);
+app.use('/room', require('./routes/room.js')());
 
-app.get('/', csrf, (req, res) => {
+app.get('/', (req, res) => {
     res.render('index', { csrfToken: req.csrfToken() });
 });
 

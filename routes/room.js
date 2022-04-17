@@ -1,5 +1,5 @@
 const express = require('express');
-const { createRoom, getRoom } = require('../controller/room.js');
+const { createRoom, getRoom, joinRoom } = require('../controller/room.js');
 
 function useRoom({ redirect } = {}) {
     return (req, res, next) => {
@@ -15,9 +15,26 @@ function useRoom({ redirect } = {}) {
     };
 }
 
-module.exports = (csrf) => {
+function authRoom(ws, req, next) {
+    const room_slug = req.params.room;
+    const room = getRoom(room_slug);
+
+    if (room === undefined) {
+        ws.close(404, 'Room not found');
+    } else {
+        const userId = req.sessionID;
+
+        if (room.creator === userId || room.users.has(userId)) {
+            req.room = room;
+            next();
+        } else {
+            ws.close(401, 'unauthorized');
+        }
+    }
+}
+
+module.exports = () => {
     const router = express.Router();
-    router.use(csrf);
 
     router.post('/create', async (req, res) => {
         const {spinner_name, room_password} = req.body;
@@ -40,6 +57,7 @@ module.exports = (csrf) => {
         const creator = room.creator === req.sessionID;
 
         res.render('spinner', {
+            csrfToken: req.csrfToken(),
             creator,
             room
         });
@@ -58,6 +76,14 @@ module.exports = (csrf) => {
         }
 
         return res.status(203).send();
+    });
+
+    router.ws('/:room/', authRoom, (ws, req) => {
+        console.log('New room connection');
+        console.log(req.room);
+        ws.on('message', (msg) => {
+            console.log(msg);
+        });
     });
 
     return router;
