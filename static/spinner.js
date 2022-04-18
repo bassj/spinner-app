@@ -16,6 +16,7 @@ class SpinnerWheel extends HTMLElement {
 
     lastPegDist = 0;
     lastAnim = Date.now();
+    lastPhys = Date.now();
     angularAccel = 0;
     angularVelocity = 0;
     rotation = 0;
@@ -39,18 +40,22 @@ class SpinnerWheel extends HTMLElement {
         requestAnimationFrame(() => {
             this.doAnim();
         });
+
+        setInterval(() => {
+            this.doPhys();
+        }, 1000.0 / 20.0);
     }
 
     get delta() {
         return ((Date.now() - this.lastAnim) / 1000).toFixed(6);
     }
 
-    doPhys() {
+    get physDelta() {
+        return ((Date.now() - this.lastPhys) / 1000).toFixed(6);
     }
 
-    doAnim() {
+    doPhys() {
         if (this.grabState.grabbed) {
-
             const startAngle = Math.atan2(this.grabState.startY, this.grabState.startX);
 
             const grabAngle = (startAngle + this.rotation - this.grabState.startAngle) % (Math.PI * 2);
@@ -62,17 +67,27 @@ class SpinnerWheel extends HTMLElement {
                 (targetAngle - Math.PI * 2 - grabAngle)
             ];
 
-            this.angularVelocity *= 0.95;
+            this.angularVelocity -= this.angularVelocity * 2 * this.physDelta;
             const delta = deltas.reduce((min, val) => (Math.abs(val) < Math.abs(min) ? val : min), Number.MAX_VALUE);
-            this.angularVelocity += delta / Math.PI * 120 * this.delta; 
+            this.angularVelocity += delta / Math.PI * 60 * this.physDelta; 
         } else {
-            this.angularVelocity *= 0.998;
+            this.angularVelocity -= this.angularVelocity * 0.20 * this.physDelta;
         }
 
+        this.doTickerPhys();
+
+        const updateEvent = new CustomEvent('phys');
+        this.dispatchEvent(updateEvent);
+
+        this.lastPhys = Date.now();
+    }
+
+    doAnim() { 
         this.rotation += this.angularVelocity * this.delta;
         this.svg.style.transform = `rotateZ(${this.rotation}rad)`;
         this.updatePegShadows();
-        this.updateTickerRotation();
+
+        this.doTickAnim();
         this.lastAnim = Date.now();
 
         requestAnimationFrame(() => {
@@ -142,7 +157,28 @@ class SpinnerWheel extends HTMLElement {
         });
     }
 
-    updateTickerRotation() {
+    doTickerPhys() {
+        const normalizedRotation = (((this.rotation + Math.PI / 2) % (2 * Math.PI)) + (2 * Math.PI)) % (2 * Math.PI);
+        const pegAngles = this.pegs.flatMap((peg) => {
+            const pegAngle = parseFloat(peg.dataset.startAngle);
+            return [pegAngle, pegAngle - Math.PI * 2, pegAngle + Math.PI * 2 ]
+        });
+
+        const pegDist = pegAngles.reduce((min, ang) => {
+            const dist = normalizedRotation - ang;
+            return (Math.abs(dist) > Math.abs(min)) ? min : dist;
+        }, Number.MAX_VALUE);
+
+        const fac = 1 - Math.min(Math.max(-1, Math.abs(pegDist / 0.08)), 1);
+        if (fac > 0) {
+            this.angularVelocity -= this.angularVelocity * this.physDelta;
+            this.angularVelocity += (((pegDist < 0)? -1:1) * fac * this.physDelta);
+       }
+
+       this.lastPegDist = pegDist;
+    }
+
+    doTickAnim() {
         const normalizedRotation = (((this.rotation + Math.PI / 2) % (2 * Math.PI)) + (2 * Math.PI)) % (2 * Math.PI);
         const pegAngles = this.pegs.flatMap((peg) => {
             const pegAngle = parseFloat(peg.dataset.startAngle);
@@ -161,12 +197,9 @@ class SpinnerWheel extends HTMLElement {
                 clone.play().then(() => {
                     clone.remove();
                 });
-
             }
 
             this.ticker.rotation = ((pegDist > 0)? 1 : -1) * fac * 0.3;
-            this.angularVelocity *= 0.996;
-            this.angularVelocity += (((pegDist < 0)? -1:1) * fac * this.delta);
        }
 
        this.lastPegDist = pegDist;
