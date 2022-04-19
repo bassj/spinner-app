@@ -25,7 +25,6 @@ async function createRoom({ name, password, creator }) {
         password: password? password_hash : undefined, 
         creator,
         users: new Set(),
-        connections: []
     };
 
     rooms_by_id[room_id] = room;
@@ -36,21 +35,12 @@ async function createRoom({ name, password, creator }) {
 
 async function joinRoom(room, user_id, password) {
     const authed = (room.password === undefined) ? true : (await bcrypt.compare(password, room.password));
-    
-    console.log('joining room');
 
     if (authed) {
         room.users.add(user_id);
     }
 
     return authed;
-}
-
-function tickRoom(room, message) {
-    console.log('tick');
-    room.connections.forEach((ws) => {
-        ws.send(JSON.stringify(message));
-    });
 }
 
 function getRoom(room_slug) {
@@ -65,5 +55,4 @@ module.exports = {
     createRoom,
     getRoom,
     joinRoom,
-    tickRoom
 };

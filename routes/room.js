@@ -3,7 +3,6 @@ const {
     createRoom,
     getRoom,
     joinRoom,
-    tickRoom,
 } = require('../controller/room.js');
 
 function useRoom({ redirect } = {}) {
@@ -78,7 +77,6 @@ module.exports = (csrf, io) => {
             return;
         }
 
-       
         sock.on('auth', ({ user_id }) => {
             if (!(room.creator == user_id || room.users.has(user_id))) {
                 sock.emit('kick', { message: 'Not authenticated.' });
@@ -86,15 +84,16 @@ module.exports = (csrf, io) => {
                 return;
             }
 
+            sock.join(room.slug);
+
             const setController = (controller_id) => {
                 room.controller = controller_id;
-                io.of(namespace).emit('set_controller', { controller_id });
-                ////io.of(namespace).in(room.slug).emit('set_controller', { controller_id });
+                io.of(namespace).in(room.slug).emit('set_controller', { controller_id });
             };
 
             sock.on('tick', (tickData) => {
                 if (room.controller == user_id) {
-                    io.of(namespace).emit('tick', tickData);
+                    sock.in(room.slug).emit('tick', tickData);
                 }
             });
 
