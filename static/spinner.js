@@ -17,7 +17,6 @@ class SpinnerWheel extends HTMLElement {
     lastPegDist = 0;
     lastAnim = Date.now();
     lastPhys = Date.now();
-    angularAccel = 0;
     angularVelocity = 0;
     rotation = 0;
 
@@ -76,7 +75,7 @@ class SpinnerWheel extends HTMLElement {
 
         this.doTickerPhys();
 
-        const updateEvent = new CustomEvent('phys');
+        const updateEvent = new CustomEvent('tick');
         this.dispatchEvent(updateEvent);
 
         this.lastPhys = Date.now();

@@ -37,12 +37,46 @@ if (authDialog) {
 }
 
 function connectToRoom() {
-    const url = new URL(window.location);
-          url.protocol = (window.location.protocol == 'https')? 'wss:' : 'ws:';
-    const ws = new WebSocket(url.toString());
+    const spinner = document.querySelector('spinner-wheel');
+    const user_id = document.body.dataset.userId;
+    const socket = io(window.location.pathname);
+    let controlling = false;
 
-    ws.addEventListener('open', (e) => {
-        console.log(e);
-        ws.send('hello world!');
+    const onTick = (e) => {
+        socket.emit('tick', {
+            angularVelocity: spinner.angularVelocity,
+            rotation: spinner.rotation
+        });
+    };
+
+    const onServerTick = ({ rotation, angularVelocity }) => {
+        spinner.rotation = rotation;
+        spinner.angularVelocity = angularVelocity;
+    };
+
+    socket.on('connect', () => {
+        socket.emit('auth', { user_id });
+    }); 
+
+    socket.on('set_controller', ( { controller_id } ) => {
+        if (user_id === controller_id) {
+            spinner.addEventListener('tick', onTick);
+            spinner.controlling = true;
+            socket.off('tick', onServerTick);
+        } else {
+            spinner.removeEventListener('tick', onTick);
+            spinner.controlling = false;
+            socket.on('tick', onServerTick);
+        }
+    });
+
+    socket.on('kick', (kick_message) => {
+        console.log(kick_message);
+    });
+    
+    socket.on('tick', onServerTick);
+
+    socket.on('disconnect', (reason) => {
+        console.log('disconnect'); // Handle disconnect
     });
 }

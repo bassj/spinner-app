@@ -5,13 +5,14 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet"> 
         <link rel="stylesheet" href="/static/theme-styles.css" />
+        <script src="/static/menu.js" defer></script>
         <title>Free Online Spinner | Spinner App</title>
     </head>
 
     <body>
         <main>
             <h1> <a href="/"> Spinner App </a> </h1>
-            <form id="main-form" action="/room/create" method="POST">
+            <form id="main-form" action="/room/create" enctype="" method="POST">
                 <h2> Create a Spinner </h2>
                 <input type="hidden" name="_csrf" value="<%=csrfToken%>" />
                 <label>

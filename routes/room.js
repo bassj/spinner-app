@@ -1,5 +1,10 @@
 const express = require('express');
-const { createRoom, getRoom, joinRoom } = require('../controller/room.js');
+const { 
+    createRoom,
+    getRoom,
+    joinRoom,
+    tickRoom,
+} = require('../controller/room.js');
 
 function useRoom({ redirect } = {}) {
     return (req, res, next) => {
@@ -15,28 +20,9 @@ function useRoom({ redirect } = {}) {
     };
 }
 
-function authRoom(ws, req, next) {
-    const room_slug = req.params.room;
-    const room = getRoom(room_slug);
-
-    if (room === undefined) {
-        ws.close(404, 'Room not found');
-    } else {
-        const userId = req.sessionID;
-
-        if (room.creator === userId || room.users.has(userId)) {
-            req.room = room;
-            next();
-        } else {
-            ws.close(401, 'unauthorized');
-        }
-    }
-}
-
-module.exports = () => {
+module.exports = (csrf, io) => {
     const router = express.Router();
-
-    router.post('/create', async (req, res) => {
+    router.post('/create', csrf, async (req, res) => {
         const {spinner_name, room_password} = req.body;
 
         if (!spinner_name) {
@@ -46,24 +32,26 @@ module.exports = () => {
         const room = await createRoom({
             name: spinner_name,
             password: room_password,
-            creator: req.sessionID
+            creator: req.session.user_id
         });
 
         res.redirect(`/room/${room.slug}`);
     });
 
-    router.get('/:room', useRoom({redirect: true}), (req, res) => {
+    router.get('/:room', csrf, useRoom({redirect: true}), (req, res) => {
         const room = req.room;
-        const creator = room.creator === req.sessionID;
+        const creator = room.creator === req.session.user_id;
+        const user_id = req.session.user_id;
 
         res.render('spinner', {
             csrfToken: req.csrfToken(),
             creator,
-            room
+            room,
+            user_id
         });
     });
 
-    router.post('/:room/auth', useRoom(), async (req, res) => {
+    router.post('/:room/auth', csrf, useRoom(), async (req, res) => {
         if (!req.body.room_password) {
             return res.status(400).send('Missing "room_password" parameter.');
         }
@@ -71,18 +59,48 @@ module.exports = () => {
         const room = req.room;
         const room_password = req.body.room_password;
 
-        if (!(await joinRoom(room, req.sessionID, room_password))) {
+        if (!(await joinRoom(room, req.session.user_id, room_password))) {
             return res.status(401).send('Invalid password');
         }
 
         return res.status(203).send();
     });
 
-    router.ws('/:room/', authRoom, (ws, req) => {
-        console.log('New room connection');
-        console.log(req.room);
-        ws.on('message', (msg) => {
-            console.log(msg);
+    io.of(/\/room\/([A-z]+-?)+/).on('connection', (sock) => {
+        // God, regex is such a cruel thing to bestow upon this world.
+        const roomName = sock.nsp.name.match(/(?<=room\/)([A-z]+-?)+/)[0]; 
+        const namespace = sock.nsp.name;
+        const room = getRoom(roomName);
+        
+        if (room == undefined) {
+            sock.emit('kick', { message: 'Room does not exist.' });
+            sock.disconnect();
+            return;
+        }
+
+       
+        sock.on('auth', ({ user_id }) => {
+            if (!(room.creator == user_id || room.users.has(user_id))) {
+                sock.emit('kick', { message: 'Not authenticated.' });
+                sock.disconnect();
+                return;
+            }
+
+            const setController = (controller_id) => {
+                room.controller = controller_id;
+                io.of(namespace).emit('set_controller', { controller_id });
+                ////io.of(namespace).in(room.slug).emit('set_controller', { controller_id });
+            };
+
+            sock.on('tick', (tickData) => {
+                if (room.controller == user_id) {
+                    io.of(namespace).emit('tick', tickData);
+                }
+            });
+
+            if (room.creator == user_id) {
+                setController(user_id);
+            }
         });
     });
 
