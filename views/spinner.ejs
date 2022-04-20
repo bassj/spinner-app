@@ -41,7 +41,7 @@
                         Display Name:
                         <input type="text" name="display_name" required />
                     </label>
-                    <% if (room.password_hash) { %>
+                    <% if (room.password_hash && !creator) { %>
                     <label>
                         Password:
                         <input type="password" name="room_password" required />

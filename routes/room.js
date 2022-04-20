@@ -52,23 +52,23 @@ module.exports = (csrf, io, sessionMiddleware) => {
 
     router.post('/:room/auth', csrf, useRoom(), async (req, res) => {
         const room = req.room;
+        const user_id = req.session.user_id;
         const { room_password, display_name } = req.body;
-        
+
         if (!display_name) {
             return res.status(400).send('Missing "display_name" parameter.');
         }
 
-        if (!room_password && room.password != undefined) {
+        if (!room_password && room.password != undefined && room.creator == user_id) {
             return res.status(400).send('Missing "room_password" parameter.');
         }
 
         try {
-            await room.join({ user_id: req.session.user_id, display_name }, room_password);
+            await room.join({ user_id, display_name }, room_password);
             req.session.display_name = display_name;
             await req.session.save();
             return res.sendStatus(203);
         } catch (e) {
-            console.log(e);
             if (e.type == 'invalid_password') {
                 return res.status(401).send(e.message);
             } else if (e.type == 'name_taken') {

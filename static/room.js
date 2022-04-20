@@ -12,7 +12,6 @@ authForm.addEventListener('submit', (e) => {
         body 
     }).then(async (resp) => {
         if (resp.ok) {
-            authDialog.removeEventListener('close', onClose);
             authDialog.close();
             connectToRoom();
         } else {
