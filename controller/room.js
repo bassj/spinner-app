@@ -12,47 +12,71 @@ function generateRoomSlug() {
     return (slug in rooms_by_slug)? generateRoomSlug() : slug;
 }
 
-async function createRoom({ name, password, creator }) {
-    const room_id = ++id_counter;
-    const room_slug = generateRoomSlug();
+class Room {
+    id            = ++id_counter;
+    slug          = generateRoomSlug();
+    users         = new Map();
+    display_names  = new Set(); 
+    password_hash = null;
+    creator       = null;
+    name          = null;
+
+    constructor(name, creator) {
+        this.name = name;
+        this.creator = creator;
+    }
     
-    const password_hash = await bcrypt.hash(password, options.BCRYPT_SALT_ROUNDS);
-
-    const room = {
-        id: room_id,
-        slug: room_slug,
-        name,
-        password: password? password_hash : undefined, 
-        creator,
-        users: new Set(),
-    };
-
-    rooms_by_id[room_id] = room;
-    rooms_by_slug[room_slug] = room;
-
-    return room;
-}
-
-async function joinRoom(room, user_id, password) {
-    const authed = (room.password === undefined) ? true : (await bcrypt.compare(password, room.password));
-
-    if (authed) {
-        room.users.add(user_id);
+    get password() {
+        return this.password_hash;
     }
 
-    return authed;
+    async set_password(password) {
+        const password_hash = await bcrypt.hash(password, options.BCRYPT_SALT_ROUNDS);
+        this.password_hash = password_hash;
+    }
+
+    async join({user_id, display_name}, password) {
+        const authed = (!this.password_hash) || (await bcrypt.compare(password, this.password_hash));
+
+        if (!authed) {
+            throw {
+                message: 'Invalid Password',
+                type: 'invalid_password'
+            };
+        }
+
+        if (this.display_names.has(display_name)) {
+            throw {
+                message: 'Display Name taken.',
+                type: 'name_taken'
+            };
+        }
+
+        this.users.set(user_id, { display_name });
+        this.display_names.add(display_name);
+
+        return authed;
+    }
+}
+
+async function createRoom({ name, password, creator }) {
+    const room = new Room(name, creator);
+
+    if (password) {
+        await room.set_password(password);
+    }
+
+    rooms_by_id[room.id] = room;
+    rooms_by_slug[room.slug] = room;
+
+    return room;
 }
 
 function getRoom(room_slug) {
     return rooms_by_slug[room_slug];
 }
 
-function deleteRoom() {
-
-}
-
 module.exports = {
     createRoom,
     getRoom,
-    joinRoom,
 };

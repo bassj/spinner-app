@@ -33,18 +33,25 @@
                     </svg>
                 </spinner-wheel>
             </div>
-            <% if (room.password) { %>
             <dialog id="auth-dialog">
                 <form action="/room/<%=room.slug%>/auth" method="POST">
-                    <h2>Enter Room Password</h2>
+                    <h2>Enter Room</h2>
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                    <input type="password" name="room_password" required />
+                    <label>
+                        Display Name:
+                        <input type="text" name="display_name" required />
+                    </label>
+                    <% if (room.password_hash) { %>
+                    <label>
+                        Password:
+                        <input type="password" name="room_password" required />
+                    </label>
+                    <% } %>
                     <p class="error-message" hidden>
                     </p>
                     <input type="submit" value="Join" />
                 </form>
             </dialog>
-            <% } %>
         </main>
     </body>
 </html>

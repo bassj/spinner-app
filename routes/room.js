@@ -19,7 +19,7 @@ function useRoom({ redirect } = {}) {
     };
 }
 
-module.exports = (csrf, io) => {
+module.exports = (csrf, io, sessionMiddleware) => {
     const router = express.Router();
     router.post('/create', csrf, async (req, res) => {
         const {spinner_name, room_password} = req.body;
@@ -51,56 +51,67 @@ module.exports = (csrf, io) => {
     });
 
     router.post('/:room/auth', csrf, useRoom(), async (req, res) => {
-        if (!req.body.room_password) {
+        const room = req.room;
+        const { room_password, display_name } = req.body;
+        
+        if (!display_name) {
+            return res.status(400).send('Missing "display_name" parameter.');
+        }
+
+        if (!room_password && room.password != undefined) {
             return res.status(400).send('Missing "room_password" parameter.');
         }
 
-        const room = req.room;
-        const room_password = req.body.room_password;
-
-        if (!(await joinRoom(room, req.session.user_id, room_password))) {
-            return res.status(401).send('Invalid password');
+        try {
+            await room.join({ user_id: req.session.user_id, display_name }, room_password);
+            req.session.display_name = display_name;
+            await req.session.save();
+            return res.sendStatus(203);
+        } catch (e) {
+            console.log(e);
+            if (e.type == 'invalid_password') {
+                return res.status(401).send(e.message);
+            } else if (e.type == 'name_taken') {
+                return res.status(400).send(e.message);
+            }
         }
-
-        return res.status(203).send();
     });
 
-    io.of(/\/room\/([A-z]+-?)+/).on('connection', (sock) => {
+    io.of(/\/room\/([A-z]+-?)+/).use(sessionMiddleware).on('connection', (sock) => {
         // God, regex is such a cruel thing to bestow upon this world.
         const roomName = sock.nsp.name.match(/(?<=room\/)([A-z]+-?)+/)[0]; 
         const namespace = sock.nsp.name;
         const room = getRoom(roomName);
-        
+        const user_id = sock.request.session.user_id;
+
         if (room == undefined) {
             sock.emit('kick', { message: 'Room does not exist.' });
             sock.disconnect();
             return;
         }
 
-        sock.on('auth', ({ user_id }) => {
-            if (!(room.creator == user_id || room.users.has(user_id))) {
-                sock.emit('kick', { message: 'Not authenticated.' });
-                sock.disconnect();
-                return;
-            }
+        if (!(room.creator == user_id || room.users.has(user_id))) {
+            sock.emit('kick', { message: 'Not authenticated.' });
+            sock.disconnect();
+            return;
+        }
 
-            sock.join(room.slug);
+        const setController = (controller_id) => {
+            room.controller = controller_id;
+            io.of(namespace).in(room.slug).emit('set_controller', { controller_id });
+        };
 
-            const setController = (controller_id) => {
-                room.controller = controller_id;
-                io.of(namespace).in(room.slug).emit('set_controller', { controller_id });
-            };
+        sock.join(room.slug);
 
-            sock.on('tick', (tickData) => {
-                if (room.controller == user_id) {
-                    sock.in(room.slug).emit('tick', tickData);
-                }
-            });
-
-            if (room.creator == user_id) {
-                setController(user_id);
+        sock.on('tick', (tickData) => {
+            if (room.controller == user_id) {
+                sock.in(room.slug).emit('tick', tickData);
             }
         });
+
+        if (room.creator == user_id) {
+            setController(user_id);
+        }
     });
 
     return router;

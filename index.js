@@ -2,28 +2,30 @@ const cookieParser  = require('cookie-parser');
 const express       = require('express');
 const session       = require('express-session');
 const socketio      = require('socket.io');
+const options       = require('./options');
 const multer        = require('multer');
 const crypto        = require('crypto');
 const csurf         = require('csurf');
 const https         = require('https');
 const http          = require('http');
 
+const sessionMiddleware = session({
+    secret: options.SECRET,
+    cookie: { secure: !options.DEBUG },
+    saveUninitialized: false,
+    resave: false,
+});
+
 const app = express();
 const http_server = http.createServer(app);
 const io  = new socketio.Server();
       io.listen(http_server);
 
-const options = require('./options');
 
 const csrf = csurf({ cookie: true });
 
 app.use('/static', express.static('static'));
-app.use(session({
-    secret: options.SECRET,
-    cookie: { secure: !options.DEBUG },
-    saveUninitialized: false,
-    resave: false,
-}));
+app.use(sessionMiddleware);
 app.use(cookieParser());
 app.use(multer().none());
 app.use(express.urlencoded({ extended: false }));
@@ -43,7 +45,7 @@ app.set('trust proxy', options.TRUST_PROXY? 1:0);
 
 app.set('view engine', 'ejs');
 
-app.use('/room', require('./routes/room.js')(csrf, io));
+app.use('/room', require('./routes/room.js')(csrf, io, (socket, next) => (sessionMiddleware(socket.request, socket.request.res || {}, next))));
 
 app.get('/', csrf, (req, res) => {
     res.render('index', { csrfToken: req.csrfToken() });
