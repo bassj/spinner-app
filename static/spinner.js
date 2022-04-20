@@ -207,6 +207,7 @@ class SpinnerWheel extends HTMLElement {
 
     handleGrab(e) {
         if (e.button != 0) return;
+        if (!this.canGrab) return;
 
         this.grabState.grabbed = true;
 
@@ -226,6 +227,7 @@ class SpinnerWheel extends HTMLElement {
 
     handleUnGrab(e) {
         if (e.button != 0) return;
+        if (!this.canGrab) return;
 
         this.grabState = {
             grabbed: false,
