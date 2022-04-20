@@ -13,13 +13,13 @@ function generateRoomSlug() {
 }
 
 class Room {
-    id            = ++id_counter;
-    slug          = generateRoomSlug();
-    users         = new Map();
+    id             = ++id_counter;
+    slug           = generateRoomSlug();
+    users          = new Map();
     display_names  = new Set(); 
-    password_hash = null;
-    creator       = null;
-    name          = null;
+    password_hash  = null;
+    creator        = null;
+    name           = null;
 
     constructor(name, creator) {
         this.name = name;

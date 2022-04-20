@@ -5,6 +5,7 @@ class SpinnerWheel extends HTMLElement {
     sectionContainer = null;
     ticker = null;
 
+    canGrab = false;
     grabState = {
         grabbed: false,
         startX: 0, 
@@ -248,6 +249,16 @@ class SpinnerWheel extends HTMLElement {
             targetX,
             targetY
         };
+    }
+
+    set controlling(value) {
+        if (value) {
+            this.canGrab = true;
+            this.style.cursor = null;
+        } else {
+            this.style.cursor = 'default';
+            this.canGrab = false;
+        }
     }
 }
 

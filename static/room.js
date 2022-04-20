@@ -41,10 +41,6 @@ function connectToRoom() {
         spinner.angularVelocity = angularVelocity;
     };
 
-    socket.on('connect', () => {
-
-    }); 
-
     socket.on('set_controller', ( { controller_id } ) => {
         if (user_id === controller_id) {
             spinner.addEventListener('tick', onTick);
@@ -60,8 +56,12 @@ function connectToRoom() {
     socket.on('kick', (kick_message) => {
         console.log(kick_message);
     });
-    
+
     socket.on('tick', onServerTick);
+
+    socket.on('connect', () => {
+        spinner.controlling = false;
+    });
 
     socket.on('disconnect', (reason) => {
         console.log('disconnect'); // Handle disconnect

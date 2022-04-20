@@ -59,7 +59,7 @@ module.exports = (csrf, io, sessionMiddleware) => {
             return res.status(400).send('Missing "display_name" parameter.');
         }
 
-        if (!room_password && room.password != undefined && room.creator == user_id) {
+        if (!room_password && room.password != undefined && room.creator != user_id) {
             return res.status(400).send('Missing "room_password" parameter.');
         }
 
@@ -103,13 +103,18 @@ module.exports = (csrf, io, sessionMiddleware) => {
 
         sock.join(room.slug);
 
+        if (room.controller) {
+            sock.emit('set_controller', { controller_id: room.controller });
+        }
+
         sock.on('tick', (tickData) => {
             if (room.controller == user_id) {
                 sock.in(room.slug).emit('tick', tickData);
             }
         });
 
-        if (room.creator == user_id) {
+
+        if (!room.controller && room.users.size == 1) {
             setController(user_id);
         }
     });
