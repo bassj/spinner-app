@@ -46,7 +46,8 @@ module.exports = (csrf, io, sessionMiddleware) => {
             csrfToken: req.csrfToken(),
             creator,
             room,
-            user_id
+            user_id,
+            reconnect: room.users.has(user_id)
         });
     });
 
@@ -75,6 +76,8 @@ module.exports = (csrf, io, sessionMiddleware) => {
                 return res.status(400).send(e.message);
             }
         }
+
+        return res.sendStatus(203);
     });
 
     io.of(/\/room\/([A-z]+-?)+/).use(sessionMiddleware).on('connection', (sock) => {
@@ -102,17 +105,23 @@ module.exports = (csrf, io, sessionMiddleware) => {
         };
 
         sock.join(room.slug);
+        io.of(namespace).in(room.slug).emit('players', room.players);
 
         if (room.controller) {
             sock.emit('set_controller', { controller_id: room.controller });
         }
 
+        sock.on('set_controller', ({ controller_id }) => {
+            if (user_id == room.creator || user_id == room.controller) {
+                setController(controller_id);
+            }
+        });
+        
         sock.on('tick', (tickData) => {
             if (room.controller == user_id) {
                 sock.in(room.slug).emit('tick', tickData);
             }
         });
-
 
         if (!room.controller && room.users.size == 1) {
             setController(user_id);

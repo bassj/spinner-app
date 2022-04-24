@@ -5,17 +5,12 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet"> 
 
-        <link rel="stylesheet" href="/static/theme-styles.css" />
-        <link rel="stylesheet" href="/static/spinner-styles.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.5.6/dialog-polyfill.min.css" integrity="sha512-J2+1q+RsZuJXabBfH1q/fgRr6jMy9By5SwVLk7bScEW7NFJkMUXxfeOyyxtDe6fsaJ4jsciexSlGrPYn9YbBIg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.5.6/dialog-polyfill.min.js" integrity="sha512-qUIG93zKzcLBVD5RGRbx2PBmbVRu+tJIl+EPLTus0z8I1AMru9sQYdlf6cBacSzYmZVncB9rcc8rYBnazqgrxA==" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script> 
-        <script src="https://cdn.socket.io/4.4.1/socket.io.min.js" integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous" defer></script>
-        <script src="/static/spinner.js" defer></script>
-        <script src="/static/room.js" defer></script>
+        <link rel="stylesheet" href="/static/dist/room.css" />
+        <script type="module" src="/static/dist/room.js" defer></script>
         <title> <%=room.name %> | Spinner App </title>
     </head>
 
-    <body data-user-id="<%= user_id %>">
+    <body data-reconnect="<%= reconnect %>" data-user-id="<%= user_id %>">
         <main>
             <h1> <a href="/"> Spinner App </a> </h1>
             <h2> <%=room.name %></h2>
@@ -33,25 +28,34 @@
                     </svg>
                 </spinner-wheel>
             </div>
-            <dialog id="auth-dialog">
-                <form action="/room/<%=room.slug%>/auth" method="POST">
-                    <h2>Enter Room</h2>
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                    <label>
-                        Display Name:
-                        <input type="text" name="display_name" required />
-                    </label>
-                    <% if (room.password_hash && !creator) { %>
-                    <label>
-                        Password:
-                        <input type="password" name="room_password" required />
-                    </label>
-                    <% } %>
-                    <p class="error-message" hidden>
-                    </p>
-                    <input type="submit" value="Join" />
-                </form>
-            </dialog>
+            <aside id="player-list">
+                <player-list>
+                    <h3>Players:</h3>
+                    <ul>
+                    </ul>
+                </player-list>
+            </aside>
+            <auth-dialog>
+                <dialog>
+                    <form action="/room/<%=room.slug%>/auth" method="POST">
+                        <h2>Enter Room</h2>
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                        <label>
+                            Display Name:
+                            <input type="text" name="display_name" required />
+                        </label>
+                        <% if (room.password_hash && !creator) { %>
+                        <label>
+                            Password:
+                            <input type="password" name="room_password" required />
+                        </label>
+                        <% } %>
+                        <p class="error-message" hidden>
+                        </p>
+                        <input type="submit" value="Join" />
+                    </form>
+                </dialog>
+            </auth-dialog>
         </main>
     </body>
 </html>

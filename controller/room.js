@@ -13,12 +13,13 @@ function generateRoomSlug() {
 }
 
 class Room {
-    id             = ++id_counter;
+    id = ++id_counter;
     slug           = generateRoomSlug();
     users          = new Map();
     display_names  = new Set(); 
     password_hash  = null;
     creator        = null;
+    controller     = null;
     name           = null;
 
     constructor(name, creator) {
@@ -33,6 +34,12 @@ class Room {
     async set_password(password) {
         const password_hash = await bcrypt.hash(password, options.BCRYPT_SALT_ROUNDS);
         this.password_hash = password_hash;
+    }
+
+    get players() {
+        return [...this.users.entries()]
+            .map(([user_id, player_data]) => 
+                ({user_id, display_name: player_data.display_name, controlling: user_id == this.controller}));
     }
 
     async join({user_id, display_name}, password) {
