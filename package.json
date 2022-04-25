@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "npx rollup -cw & nodemon index.js && fg",
     "preinstall": "npx npm-force-resolutions"
   },
   "author": "Jack Bass",

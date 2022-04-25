@@ -40,6 +40,10 @@ h2 {
     margin: 1.5rem;
 }
 
+dialog:not([open]) {
+    display: none !important;
+}
+
 form#main-form {
     display: flex;
     flex-direction: column;
@@ -51,42 +55,7 @@ form#main-form {
     min-height: 500px;
 }
 
-dialog#auth-dialog {
-    min-height: 250px;
-    border-width: 0px;
-    color: white;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-dialog:not([open]) {
-    display: none !important;
-}
-
-dialog#auth-dialog .error-message {
-    color: #dc2f3f;
-}
-
-dialog#auth-dialog form {
-    display: flex;
-    flex-direction: column;
-
-    width: 100%;
-    height: 100%;
-    flex-grow: 1;
-}
-
-dialog#auth-dialog label {
-    margin: 0px;
-    margin-bottom: 1rem;
-}
-
-dialog#auth-dialog input[type="submit"] {
-    margin-top: auto;
-    margin-bottom: 2rem;
-}
-
-form#main-form, dialog#auth-dialog {
+form#main-form, auth-dialog dialog {
     display: flex;
     flex-direction: column;
 

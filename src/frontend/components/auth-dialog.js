@@ -1,3 +1,5 @@
+import '../styles/auth-dialog-styles.scss';
+
 export class AuthDialog extends HTMLElement {
    dialog   = null;
    form     = null;
