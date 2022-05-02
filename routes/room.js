@@ -87,6 +87,12 @@ module.exports = (csrf, io, sessionMiddleware) => {
         const room = getRoom(roomName);
         const user_id = sock.request.session.user_id;
 
+        const broadcast = (evt, arg) => (io.of(namespace).in(room.slug).emit(evt, arg));
+        const setController = (controller_id) => {
+            room.controller = controller_id;
+            broadcast('set_controller', { controller_id });
+        };
+
         if (room == undefined) {
             sock.emit('kick', { message: 'Room does not exist.' });
             sock.disconnect();
@@ -97,15 +103,12 @@ module.exports = (csrf, io, sessionMiddleware) => {
             sock.emit('kick', { message: 'Not authenticated.' });
             sock.disconnect();
             return;
+        } else if (room.users.has(user_id)) {
+            room.reconnect(user_id);
         }
 
-        const setController = (controller_id) => {
-            room.controller = controller_id;
-            io.of(namespace).in(room.slug).emit('set_controller', { controller_id });
-        };
-
         sock.join(room.slug);
-        io.of(namespace).in(room.slug).emit('players', room.players);
+        broadcast('players', room.players);
 
         if (room.controller) {
             sock.emit('set_controller', { controller_id: room.controller });
@@ -116,11 +119,16 @@ module.exports = (csrf, io, sessionMiddleware) => {
                 setController(controller_id);
             }
         });
-        
+
         sock.on('tick', (tickData) => {
             if (room.controller == user_id) {
                 sock.in(room.slug).emit('tick', tickData);
             }
+        });
+
+        sock.on('disconnecting', () => {
+            room.disconnect(user_id);
+            broadcast('players', room.players);
         });
 
         if (!room.controller && room.users.size == 1) {

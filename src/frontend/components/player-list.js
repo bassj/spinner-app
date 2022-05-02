@@ -59,6 +59,7 @@ export class PlayerList extends HTMLElement {
         this._playerElems.clear();
 
         for (const pl of players) {
+            if (!pl.connected) continue;
             this.add(pl);
         }
     }

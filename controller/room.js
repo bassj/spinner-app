@@ -39,7 +39,30 @@ class Room {
     get players() {
         return [...this.users.entries()]
             .map(([user_id, player_data]) => 
-                ({user_id, display_name: player_data.display_name, controlling: user_id == this.controller}));
+                ({
+                    user_id,
+                    display_name: player_data.display_name,
+                    controlling: user_id == this.controller,
+                    connected: player_data.connected
+                }));
+    }
+
+    disconnect(user_id) {
+        const user = {
+            ...this.users.get(user_id),
+            connected: false
+        };
+
+        this.users.set(user_id, user);
+    }
+
+    reconnect(user_id) {
+        const user = {
+            ...this.users.get(user_id),
+            connected: true
+        };
+
+        this.users.set(user_id, user);
     }
 
     async join({user_id, display_name}, password) {
@@ -61,7 +84,7 @@ class Room {
             };
         }
 
-        this.users.set(user_id, { display_name });
+        this.users.set(user_id, { display_name, connected: true });
         this.display_names.add(display_name);
 
         return authed;
