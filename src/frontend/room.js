@@ -32,8 +32,8 @@ function connectToRoom() {
         spinner.angularVelocity = angularVelocity;
     };
 
-    socket.on('set_controller', ( { controller_id } ) => {
-        playerList.setController(controller_id);
+    socket.on('set_controller', ( { controller_id, display_name } ) => {
+        playerList.setController({ controller_id, display_name });
         if (user_id === controller_id) {
             spinner.addEventListener('tick', onTick);
             spinner.controlling = true;

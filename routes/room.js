@@ -89,8 +89,9 @@ module.exports = (csrf, io, sessionMiddleware) => {
 
         const broadcast = (evt, arg) => (io.of(namespace).in(room.slug).emit(evt, arg));
         const setController = (controller_id) => {
+            const { display_name } = room.users.get(controller_id);
             room.controller = controller_id;
-            broadcast('set_controller', { controller_id });
+            broadcast('set_controller', { controller_id, display_name });
         };
 
         if (room == undefined) {
@@ -111,7 +112,8 @@ module.exports = (csrf, io, sessionMiddleware) => {
         broadcast('players', room.players);
 
         if (room.controller) {
-            sock.emit('set_controller', { controller_id: room.controller });
+            const user = room.users.get(room.controller);
+            sock.emit('set_controller', { controller_id: room.controller, display_name: user.display_name });
         }
 
         sock.on('set_controller', ({ controller_id }) => {
