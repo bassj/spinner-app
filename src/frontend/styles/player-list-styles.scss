@@ -1,0 +1,59 @@
+player-list {
+    display: block;
+    padding: 1rem;
+
+    ul {
+        margin: 0px;
+        counter-reset: item;
+        padding-left: 0px;
+    }
+
+    li {
+        display: flex;
+        font-weight: 500;
+        align-items: center;
+
+        &:before {
+            content: counter(item) ". ";
+            counter-increment: item;
+            display: block;
+            margin-right: auto;
+            font-weight: bold;
+        }
+
+        button {
+            border: 0px;
+            background: transparent;
+
+            margin-left: 0.5rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            cursor: pointer;
+            display: block;
+
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' class='icon icon-tabler icon-tabler-hand-finger' width='24' height='24' viewBox='0 0 24 24' stroke-width='1' stroke='currentColor' fill='white' stroke-linecap='round' stroke-linejoin='round'%3E%3Cdesc%3EDownload more icon variants from https://tabler-icons.io/i/hand-finger%3C/desc%3E%3Cpath stroke='none' d='M0 0h24v24H0z' fill='none'/%3E%3Cpath d='M8 13v-8.5a1.5 1.5 0 0 1 3 0v7.5' /%3E%3Cpath d='M11 11.5v-2a1.5 1.5 0 1 1 3 0v2.5' /%3E%3Cpath d='M14 10.5a1.5 1.5 0 0 1 3 0v1.5' /%3E%3Cpath d='M17 11.5a1.5 1.5 0 0 1 3 0v4.5a6 6 0 0 1 -6 6h-2h.208a6 6 0 0 1 -5.012 -2.7a69.74 69.74 0 0 1 -.196 -.3c-.312 -.479 -1.407 -2.388 -3.286 -5.728a1.5 1.5 0 0 1 .536 -2.022a1.867 1.867 0 0 1 2.28 .28l1.47 1.47' /%3E%3C/svg%3E");
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: contain;
+
+            transition: 0.2s ease;
+            opacity: 0.5;
+
+            &[disabled] {
+                opacity: 0;
+                cursor: default;
+            }
+
+            &:not([disabled]):hover {
+                opacity: 1;
+            }
+       }
+
+       &[controlling] {
+            button {
+                opacity: 1;
+                cursor: default;
+           }
+       }
+    }
+}

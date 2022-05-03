@@ -1,3 +1,5 @@
+import '../styles/player-list-styles.scss';
+
 const is_creator = document.body.dataset.creator === "true";
 const my_user_id    = document.body.dataset.userId;
 
