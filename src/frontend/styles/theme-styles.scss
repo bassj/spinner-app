@@ -74,16 +74,18 @@ form#main-form, auth-dialog dialog {
 }
 
 aside#menu-container {
-   background: rgba(0, 0, 0, 0.2);
+    overflow: hidden;
 
-   position: absolute;
-   bottom: 0px;
-   right: 0px;
+    background: rgba(0, 0, 0, 0.2);
 
-   height: 400px;
-   width: 250px;
+    display: flex;
 
-   overflow-y: auto;
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+
+    min-height: 400px;
+    min-width: 250px;
 }
 
 form label {

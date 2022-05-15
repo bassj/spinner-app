@@ -1,6 +1,20 @@
+const lightGray = '#efefef';
+const darkGray  = '#cfcfcf';
+
 export class SpinnerWheel extends HTMLElement {
     sections = [];
     pegs = [];
+
+    sectionsMeta = [
+        { size: 1, color: lightGray },
+        { size: 1, color: darkGray  },
+        { size: 1, color: lightGray },
+        { size: 1, color: darkGray  },
+        { size: 1, color: lightGray },
+        { size: 1, color: darkGray  },
+        { size: 1, color: lightGray },
+        { size: 1, color: darkGray  },
+    ];
 
     sectionContainer = null;
     ticker = null;
@@ -21,18 +35,13 @@ export class SpinnerWheel extends HTMLElement {
     angularVelocity = 0;
     rotation = 0;
 
-   clickSound = new Audio('/static/click.mp3');
-
-    colorPalette = [
-        '#efefef',
-        '#cfcfcf',
-    ];
+    clickSound = new Audio('/static/click.mp3');
 
     connectedCallback() {
         this.svg = this.querySelector('svg');
         this.sectionContainer = this.querySelector('g');
         this.ticker = document.querySelector('spinner-ticker');
-        this.buildSections(8);
+        this.buildSections();
 
         this.addEventListener('mousedown', (e) => this.handleGrab(e));
         addEventListener('mousemove', (e) => this.handleMouseMove(e));
@@ -44,6 +53,12 @@ export class SpinnerWheel extends HTMLElement {
         setInterval(() => {
             this.doPhys();
         }, 1000.0 / 20.0);
+    }
+
+    setSections(sections) {
+        this.sectionsMeta = sections;
+        this.sectionContainer.innerHTML = "";
+        this.buildSections();
     }
 
     get delta() {
@@ -95,16 +110,22 @@ export class SpinnerWheel extends HTMLElement {
         });
     }
 
-    buildSections(numSections) {
-        const sectionAngle = (2 * Math.PI) / numSections;
+    buildSections() {
+        const numSections = this.sectionsMeta.length;
+        const totalFrUnits = this.sectionsMeta.reduce((acc, val) => (acc + parseInt(val.size)), 0);
         const radius = 32;
 
+        let prevEndAngle = 0;
         let sections = [];
         let pegs = [];
 
-        for (let i = 0; i < numSections; i++) {
-            const startAngle = i * sectionAngle;
-            const endAngle = (i + 1) * sectionAngle;
+        this.sectionsMeta.forEach((section) => {
+            const sectionAngle = (parseFloat(section.size) / totalFrUnits) * 2 * Math.PI;
+            const startAngle = prevEndAngle;
+            const endAngle = startAngle + sectionAngle;
+            prevEndAngle = endAngle;
+
+            const bgColor = section.color;
 
             const startPos = `${Math.cos(startAngle) * radius} ${Math.sin(startAngle) * radius}`;
             const endPos   = `${Math.cos(endAngle) * radius} ${Math.sin(endAngle) * radius}`;
@@ -114,7 +135,7 @@ export class SpinnerWheel extends HTMLElement {
             
             const pathElem = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             pathElem.setAttribute('d', path);
-            pathElem.setAttribute('fill', this.colorPalette[i % this.colorPalette.length]);
+            pathElem.setAttribute('fill', bgColor);
 
             // Build Peg
             const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -131,7 +152,7 @@ export class SpinnerWheel extends HTMLElement {
 
             pegs.push(group);
             sections.push(pathElem);
-        }
+        });
 
         this.sections = sections;
         this.pegs = pegs;
@@ -158,7 +179,8 @@ export class SpinnerWheel extends HTMLElement {
     }
 
     doTickerPhys() {
-        const normalizedRotation = (((this.rotation + Math.PI / 2) % (2 * Math.PI)) + (2 * Math.PI)) % (2 * Math.PI);
+        const normalizedRotation = 6.28 - (((this.rotation + Math.PI / 2) % (2 * Math.PI)) + (2 * Math.PI)) % (2 * Math.PI);
+
         const pegAngles = this.pegs.flatMap((peg) => {
             const pegAngle = parseFloat(peg.dataset.startAngle);
             return [pegAngle, pegAngle - Math.PI * 2, pegAngle + Math.PI * 2 ]
@@ -172,14 +194,15 @@ export class SpinnerWheel extends HTMLElement {
         const fac = 1 - Math.min(Math.max(-1, Math.abs(pegDist / 0.08)), 1);
         if (fac > 0) {
             this.angularVelocity -= this.angularVelocity * this.physDelta;
-            this.angularVelocity += (((pegDist < 0)? -1:1) * fac * this.physDelta);
+            this.angularVelocity += (((pegDist < 0)? 1:-1) * fac * this.physDelta);
        }
 
        this.lastPegDist = pegDist;
     }
 
     doTickAnim() {
-        const normalizedRotation = (((this.rotation + Math.PI / 2) % (2 * Math.PI)) + (2 * Math.PI)) % (2 * Math.PI);
+        const normalizedRotation = 6.28 - (((this.rotation + Math.PI / 2) % (2 * Math.PI)) + (2 * Math.PI)) % (2 * Math.PI);
+
         const pegAngles = this.pegs.flatMap((peg) => {
             const pegAngle = parseFloat(peg.dataset.startAngle);
             return [pegAngle, pegAngle - Math.PI * 2, pegAngle + Math.PI * 2 ]
@@ -194,9 +217,7 @@ export class SpinnerWheel extends HTMLElement {
         if (fac > 0) {
             if ((this.lastPegDist < 0 && pegDist > 0) || (this.lastPegDist > 0 && pegDist < 0)) {
                 const clone = this.clickSound.cloneNode();
-                clone.play().then(() => {
-                    clone.remove();
-                });
+                      clone.play().then(() => clone.remove());
             }
 
             this.ticker.rotation = ((pegDist > 0)? 1 : -1) * fac * 0.3;

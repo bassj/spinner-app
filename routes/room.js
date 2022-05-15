@@ -116,6 +116,13 @@ module.exports = (csrf, io, sessionMiddleware) => {
             sock.emit('set_controller', { controller_id: room.controller, display_name: user.display_name });
         }
 
+        if (room.creator == user_id) {
+            sock.on('room_settings', (settings) => {
+                //TODO: validate settings.
+                broadcast('room_settings', settings);
+            });
+        }
+
         sock.on('set_controller', ({ controller_id }) => {
             if (user_id == room.creator || user_id == room.controller) {
                 setController(controller_id);

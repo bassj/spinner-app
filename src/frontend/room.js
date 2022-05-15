@@ -6,6 +6,9 @@ import { io } from 'socket.io-client';
 import spinner from './components/spinner'; 
 import playerList from './components/player-list';
 import authDialog from './components/auth-dialog';
+import settingsMenu from './components/settings-menu';
+
+const isCreator = document.body.dataset.creator == "true";
 
 if (document.body.dataset.reconnect == "true") {
     connectToRoom();
@@ -18,7 +21,6 @@ function connectToRoom() {
     const spinner = document.querySelector('spinner-wheel');
     const user_id = document.body.dataset.userId;
     const socket = io(window.location.pathname);
-    let controlling = false;
 
     const onTick = (e) => {
         socket.emit('tick', {
@@ -32,9 +34,14 @@ function connectToRoom() {
         spinner.angularVelocity = angularVelocity;
     };
 
-    socket.on('set_controller', ( { controller_id, display_name } ) => {
-        playerList.setController({ controller_id, display_name });
-        if (user_id === controller_id) {
+    if (isCreator) {
+        settingsMenu.addEventListener('input', (e) => {
+            socket.emit('room_settings', settingsMenu.settings);
+        });
+    }
+
+    const setControlling = (isControlling) => {
+        if (isControlling) {
             spinner.addEventListener('tick', onTick);
             spinner.controlling = true;
             socket.off('tick', onServerTick);
@@ -43,10 +50,19 @@ function connectToRoom() {
             spinner.controlling = false;
             socket.on('tick', onServerTick);
         }
+    }
+
+    socket.on('set_controller', ( { controller_id, display_name } ) => {
+        playerList.setController({ controller_id, display_name });
+        setControlling(user_id === controller_id);
     });
 
     playerList.addEventListener('set_controller', (e) => {
         socket.emit('set_controller', { controller_id: e.detail.user_id });
+    });
+
+    socket.on('room_settings', (settings) => {
+        spinner.setSections(settings.sections)
     });
 
     socket.on('kick', (kick_message) => {

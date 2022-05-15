@@ -2,6 +2,9 @@ player-list {
     display: block;
     padding: 1rem;
 
+    min-height: 400px;
+    min-width: 250px;
+
     ul {
         margin: 0px;
         counter-reset: item;
@@ -36,7 +39,7 @@ player-list {
             background-repeat: no-repeat;
             background-size: contain;
 
-            transition: 0.2s ease;
+            transition: opacity 0.2s ease;
             opacity: 0.5;
 
             &[disabled] {
@@ -55,5 +58,9 @@ player-list {
                 cursor: default;
            }
        }
+    }
+
+    &[hidden] {
+        visibility: hidden;
     }
 }
