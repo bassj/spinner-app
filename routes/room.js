@@ -118,8 +118,8 @@ module.exports = (csrf, io, sessionMiddleware) => {
 
         if (room.creator == user_id) {
             sock.on('room_settings', (settings) => {
-                //TODO: validate settings.
-                broadcast('room_settings', settings);
+                room.settings = settings;
+                broadcast('room_settings', room.settings);
             });
         }
 
@@ -143,6 +143,8 @@ module.exports = (csrf, io, sessionMiddleware) => {
         if (!room.controller && room.users.size == 1) {
             setController(user_id);
         }
+
+        sock.emit('room_settings', room.settings);
     });
 
     return router;

@@ -21,6 +21,18 @@ class Room {
     creator        = null;
     controller     = null;
     name           = null;
+    settings       = {
+        sections: [
+            { size: 1, color: '#efefef' },
+            { size: 1, color: '#cfcfcf' },
+            { size: 1, color: '#efefef' },
+            { size: 1, color: '#cfcfcf' },
+            { size: 1, color: '#efefef' },
+            { size: 1, color: '#cfcfcf' },
+            { size: 1, color: '#efefef' },
+            { size: 1, color: '#cfcfcf' },
+        ]
+    };
 
     constructor(name, creator) {
         this.name = name;
