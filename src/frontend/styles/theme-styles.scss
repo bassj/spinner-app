@@ -30,6 +30,13 @@ h1, h2 {
 h1 a {
     text-decoration: none;
     color: white;
+    text-shadow: 0px 0px 16px rgb(255, 255, 255, 0.2);
+
+    transition: text-shadow 0.2s ease;
+
+    &:hover {
+        text-shadow: 0px 0px 0px rgb(255, 255, 255, 0.2);
+    }
 }
 
 h1 {
@@ -86,6 +93,10 @@ aside#menu-container {
 
     min-height: 400px;
     min-width: 250px;
+
+    border-top-left-radius: 10px;
+    box-shadow: 0px 0px 2px inset rgba(243, 239, 57, 0.3);
+    backdrop-filter: blur(1px);
 }
 
 form label {
