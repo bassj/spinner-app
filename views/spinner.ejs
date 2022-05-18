@@ -13,7 +13,10 @@
     <body data-reconnect="<%= reconnect %>" data-user-id="<%= user_id %>" data-creator="<%= creator %>">
         <main>
             <h1> <a href="/"> Spinner App </a> </h1>
-            <h2> <%=room.name %></h2>
+            <room-title>
+                <h2> <%=room.name %> </h2>
+                <button type="button" title="Edit Room Title" class="edit-btn" <% if (!creator) { %> hidden <% } %>></button>
+            </room-title>
 
             <div class="spinner-container">
                 <spinner-ticker>

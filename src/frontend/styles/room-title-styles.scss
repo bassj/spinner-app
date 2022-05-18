@@ -1,0 +1,39 @@
+room-title {
+    display: flex;
+    position: relative;
+
+    justify-content: center;
+
+    h2 {
+        margin: 0px;
+        padding: 2px;
+    }
+
+    button {
+        display: inline-block;
+        width: 1.5rem;
+        height: 1.5rem;
+
+        align-self: start;
+
+        border: 0px;
+
+        margin-left: 0.3rem;
+
+        background:transparent;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' class='icon icon-tabler icon-tabler-edit' width='24' height='24' viewBox='0 0 24 24' stroke-width='2' stroke='white' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cdesc%3EDownload more icon variants from https://tabler-icons.io/i/edit%3C/desc%3E%3Cpath stroke='none' d='M0 0h24v24H0z' fill='none'/%3E%3Cpath d='M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1' /%3E%3Cpath d='M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z' /%3E%3Cpath d='M16 5l3 3' /%3E%3C/svg%3E");
+
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+
+        cursor: pointer;
+
+        &:hover {
+            opacity: 1;
+        }
+
+        &[hidden] {
+            display: none;
+        }
+    }
+}

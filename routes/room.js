@@ -121,6 +121,11 @@ module.exports = (csrf, io, sessionMiddleware) => {
                 room.settings = settings;
                 broadcast('room_settings', room.settings);
             });
+
+            sock.on('room_title', (title) => {
+                room.name = title;
+                sock.in(room.slug).emit('room_title', title);
+            });
         }
 
         sock.on('set_controller', ({ controller_id }) => {
