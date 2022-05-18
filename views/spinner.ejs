@@ -35,14 +35,22 @@
                     </ul>
                 </player-list>
                 <settings-menu>
-                    <button class="settings-menu" aria-pressed="false">
+                    <button class="settings-menu" aria-pressed="false" <% if (!creator) { %> hidden <% } %>>
                     </button>
                     <div class="settings-popup" hidden>
                         <h3 id="spinner-settings-title"> Spinner Settings </h3>
                         <form aria-labeledby="spinner-settings-title">
+                            <h4> Sections </h4>
                             <section-settings>
                                 <ul>
-
+                                    <template id="section-editor">
+                                        <li>
+                                            <input type="number" min="1" />
+                                            <input type="color" />
+                                            <button type="button" title="Clone Section" class="clone-btn"></button>
+                                            <button type="button" title="Delete Section" class="delete-btn"></button>
+                                        </li>
+                                    </template>
                                 </ul>
                             </section-settings>
                         </form>

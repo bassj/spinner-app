@@ -4,10 +4,7 @@ import spinner from './spinner.js';
 
 class SectionSettings extends HTMLElement {
     _ul = this.querySelector('ul');
-
-    connectedCallback() {
-
-    }
+    _template = this._ul.querySelector('template');
 
     set value(val) {
         this._ul.innerHTML = '';
@@ -30,18 +27,29 @@ class SectionSettings extends HTMLElement {
     }
 
     _buildSettingForm({ size, color }) {
-        const li = document.createElement('li');
+        const tpl = this._template.content.cloneNode(true);
+        const li = tpl.querySelector('li');
 
-        const colorPicker = document.createElement('input');
-              colorPicker.setAttribute('type', 'color');
+        const colorPicker = li.querySelector('input[type="color"]');
               colorPicker.value = color;
 
-        const sizePicker = document.createElement('input');
-              sizePicker.setAttribute('type', 'number');
-              sizePicker.setAttribute('min', '1');
+        const sizePicker = li.querySelector('input[type="number"]');
               sizePicker.value = size;
 
-        li.append(sizePicker, colorPicker);
+        const deleteBtn = li.querySelector('button.delete-btn');
+              deleteBtn.addEventListener('click', (e) => {
+                  if (e.buttons) return;
+                  li.remove();
+                  this.dispatchEvent(new Event('input', { bubbles: true }));
+              });
+
+        const cloneBtn = li.querySelector('button.clone-btn');
+              cloneBtn.addEventListener('click', (e) => {
+                  if (e.buttons) return;
+                  const clone = li.cloneNode(true);
+                  this._ul.append(clone);
+                  this.dispatchEvent(new Event('input', { bubbles: true }));
+              });
 
         return li;
     }
