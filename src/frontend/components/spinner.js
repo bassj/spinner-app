@@ -130,8 +130,10 @@ export class SpinnerWheel extends HTMLElement {
             const startPos = `${Math.cos(startAngle) * radius} ${Math.sin(startAngle) * radius}`;
             const endPos   = `${Math.cos(endAngle) * radius} ${Math.sin(endAngle) * radius}`;
 
+            const largeArc = sectionAngle >= Math.PI ? 1 : 0;
+
             // Build section
-            const path = `M0 0 L ${startPos} A ${radius} ${radius} 0 0 1 ${endPos} Z`;
+            const path = `M0 0 L ${startPos} A ${radius} ${radius} 0 ${largeArc} 1 ${endPos} Z`;
             
             const pathElem = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             pathElem.setAttribute('d', path);
@@ -161,6 +163,12 @@ export class SpinnerWheel extends HTMLElement {
 
         this.sectionContainer.append(...sections);
         this.sectionContainer.append(...pegs);
+
+        const cap = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+              cap.setAttribute('r', 1.6);
+              cap.setAttribute('fill', 'black');
+
+        this.sectionContainer.append(cap);
     }
 
     updatePegShadows() {
