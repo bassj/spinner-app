@@ -2,6 +2,8 @@ import '../styles/settings-menu-styles.scss';
 import playerList from './player-list.js';
 import spinner from './spinner.js';
 
+import { getImageData } from '../util';
+
 class SectionSettings extends HTMLElement {
     _ul = this.querySelector('ul');
     _template = this._ul.querySelector('template');
@@ -13,15 +15,49 @@ class SectionSettings extends HTMLElement {
         );
     }
 
-    get value() {
+    async getValue() {
         let values = [];
 
-        this._ul.querySelectorAll('li').forEach((li) => {
-            values.push({ 
+        const lis = Array.from(this._ul.querySelectorAll('li'));
+
+        console.log(lis);
+
+        for (const li of lis) {
+            const section = { 
                 size: li.querySelector('[type="number"]').value, 
-                color: li.querySelector('[type="color"]').value 
-            });
-        });
+                color: li.querySelector('[type="color"]').value,
+                text: li.querySelector('[type="text"]').value,
+                image: null
+            };
+
+            const image = li.querySelector('[type="file"]').files[0];
+            
+            if (image) {
+                const cnvSize = 200;
+                const imgData = await getImageData(image);
+                const cnv = document.createElement('canvas');
+                      cnv.width = cnvSize;
+                      cnv.height = cnvSize;
+
+                const aspect = imgData.width / imgData.height;
+
+
+                const imgWidth = (aspect > 1) ? cnvSize * aspect : cnvSize; 
+                const imgHeight = (aspect < 1) ? cnvSize / aspect : cnvSize;
+                const imgY = (cnvSize - imgHeight) / 2;
+                const imgX = (cnvSize - imgWidth) / 2;
+
+                console.log(imgWidth);
+                console.log(imgHeight);
+
+                const ctx = cnv.getContext('2d');
+                      ctx.drawImage(imgData, imgX, imgY, imgWidth, imgHeight);
+                
+                section.image = cnv.toDataURL();
+            }
+
+            values.push(section);
+        }
 
         return values;
     }
@@ -83,9 +119,10 @@ class SettingsMenu extends HTMLElement {
         this._settingsPopup.hidden = true;
     }
 
-    get settings() {
+    async getSettings() {
+        console.log('getsettings');
         return {
-            sections: this._sectionSettings.value
+            sections: await this._sectionSettings.getValue()
         };
     }
 }

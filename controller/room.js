@@ -23,14 +23,14 @@ class Room {
     name           = null;
     settings       = {
         sections: [
-            { size: 1, color: '#efefef' },
-            { size: 1, color: '#cfcfcf' },
-            { size: 1, color: '#efefef' },
-            { size: 1, color: '#cfcfcf' },
-            { size: 1, color: '#efefef' },
-            { size: 1, color: '#cfcfcf' },
-            { size: 1, color: '#efefef' },
-            { size: 1, color: '#cfcfcf' },
+            { size: 1, color: '#efefef', text: '' },
+            { size: 1, color: '#cfcfcf', text: '' },
+            { size: 1, color: '#efefef', text: '' },
+            { size: 1, color: '#cfcfcf', text: '' },
+            { size: 1, color: '#efefef', text: '' },
+            { size: 1, color: '#cfcfcf', text: '' },
+            { size: 1, color: '#efefef', text: '' },
+            { size: 1, color: '#cfcfcf', text: '' },
         ]
     };
 

@@ -36,8 +36,9 @@ function connectToRoom() {
     };
 
     if (isCreator) {
-        settingsMenu.addEventListener('input', (e) => {
-            socket.emit('room_settings', settingsMenu.settings);
+        settingsMenu.addEventListener('input', async (e) => {
+            console.log('input');
+            socket.emit('room_settings', await settingsMenu.getSettings());
         });
 
         roomTitle.addEventListener('input', (e) => {

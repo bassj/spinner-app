@@ -74,6 +74,14 @@ section-settings {
             cursor: pointer;
         }
 
+        input[type="text"] {
+            background: transparent;
+
+            color: white;
+
+            border: 1px solid white;
+        }
+
         input[type="number"] {
             font-family: "Montserrat";
             font-weight: bold;
