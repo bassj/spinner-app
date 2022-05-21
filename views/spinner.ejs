@@ -43,15 +43,25 @@
                     <div class="settings-popup" hidden>
                         <h3 id="spinner-settings-title"> Spinner Settings </h3>
                         <form aria-labeledby="spinner-settings-title">
-                            <h4> Sections </h4>
+                            <color-settings>
+                                <h4 class="color-header"> 
+                                    Colors
+                                    <button type="button" title="Delete colors" class="delete-color-btn"></button>
+                                </h4>
+                                <div class="section-colors">
+                                    <ul class="section-colors">
+                                    </ul>
+                                    <button type="button" class="add-color-btn"></button>
+                                </div>
+                            </color-settings>
                             <section-settings>
+                                <h4> Sections </h4>
                                 <ul>
                                     <template id="section-editor">
                                         <li>
                                             <input type="number" min="1" />
                                             <input type="text" />
                                             <input type="file" accept="image/*" />
-                                            <input type="color" />
                                             <button type="button" title="Clone Section" class="clone-btn"></button>
                                             <button type="button" title="Delete Section" class="delete-btn"></button>
                                         </li>
@@ -69,7 +79,7 @@
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
                         <label>
                             Display Name:
-                            <input type="text" name="display_name" required />
+                            <input type="text" name="display_name" placeholder="Anonymous" required />
                         </label>
                         <% if (room.password_hash && !creator) { %>
                         <label>

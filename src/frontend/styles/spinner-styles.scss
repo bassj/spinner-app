@@ -25,9 +25,11 @@ spinner-wheel {
       100px 100px 80px rgba(0, 0, 0, 0.07);
 }
 
-spinner-wheel text {
-    pointer-events: none;
-    user-select: none;
+spinner-wheel svg {
+    image, text {
+        pointer-events: none;
+        user-select: none;
+    }
 }
 
 spinner-wheel path {

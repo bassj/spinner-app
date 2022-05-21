@@ -5,16 +5,20 @@ export class SpinnerWheel extends HTMLElement {
     sections = [];
     pegs = [];
 
-    sectionsMeta = [
-        { size: 1, color: lightGray, text: '' },
-        { size: 1, color: darkGray,  text: '' },
-        { size: 1, color: lightGray, text: '' },
-        { size: 1, color: darkGray,  text: '' },
-        { size: 1, color: lightGray, text: '' },
-        { size: 1, color: darkGray,  text: '' },
-        { size: 1, color: lightGray, text: '' },
-        { size: 1, color: darkGray,  text: '' },
-    ];
+    settings = {
+        sections: [
+            { size: 1, text: 'One' },
+            { size: 1, text: 'Two' },
+            { size: 1, text: 'Three' },
+            { size: 1, text: 'Four' },
+            { size: 1, text: 'Five' },
+            { size: 1, text: 'Six' },
+            { size: 1, text: 'Seven' },
+            { size: 1, text: 'Eight' },
+        ],
+        images: [],
+        colors: [lightGray, darkGray]
+    }
 
     sectionContainer = null;
     ticker = null;
@@ -56,7 +60,14 @@ export class SpinnerWheel extends HTMLElement {
     }
 
     setSections(sections) {
-        this.sectionsMeta = sections;
+        console.log(sections);
+        this.settings.sections = sections;
+        this.sectionContainer.innerHTML = "";
+        this.buildSections();
+    }
+
+    setColors(colors) {
+        this.settings.colors = colors;
         this.sectionContainer.innerHTML = "";
         this.buildSections();
     }
@@ -111,8 +122,8 @@ export class SpinnerWheel extends HTMLElement {
     }
 
     buildSections() {
-        const numSections = this.sectionsMeta.length;
-        const totalFrUnits = this.sectionsMeta.reduce((acc, val) => (acc + parseInt(val.size)), 0);
+        const numSections = this.settings.sections.length;
+        const totalFrUnits = this.settings.sections.reduce((acc, val) => (acc + parseInt(val.size)), 0);
         const radius = 32;
 
         let prevEndAngle = 0;
@@ -134,13 +145,13 @@ export class SpinnerWheel extends HTMLElement {
         circleClip.append(circle);
         defs.append(circleClip);
 
-        this.sectionsMeta.forEach((section, index) => {
+        this.settings.sections.forEach((section, index) => {
             const sectionAngle = (parseFloat(section.size) / totalFrUnits) * 2 * Math.PI;
             const startAngle = prevEndAngle;
             const endAngle = startAngle + sectionAngle;
             prevEndAngle = endAngle;
 
-            const bgColor = section.color;
+            const bgColor = this.settings.colors[index % this.settings.colors.length];
 
             const startPos = `${Math.cos(startAngle) * radius} ${Math.sin(startAngle) * radius}`;
             const endPos   = `${Math.cos(endAngle) * radius} ${Math.sin(endAngle) * radius}`;
@@ -168,14 +179,14 @@ export class SpinnerWheel extends HTMLElement {
             const imageY = Math.sin(imageAngle) * 16;
             const imageRot = imageAngle * (180 / Math.PI);
 
-            const sectionImage = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-                  sectionImage.setAttribute('width', imageSize);
-                  sectionImage.setAttribute('height', imageSize);
-                  //sectionImage.setAttribute('x', imageX - imageWidth / 2);
-                  //sectionImage.setAttribute('y', imageY - imageHeight / 2);
-                  sectionImage.setAttribute('transform', `translate(${imageX} ${imageY}) rotate(${imageRot + 90}) translate(${-imageSize / 2} ${-imageSize / 2})`);
-                  sectionImage.setAttribute('href', section.image); 
-                  sectionImage.setAttributeNS(null, 'clip-path', 'url(#circle-clip)');
+            if (section.image) {
+                const sectionImage = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+                      sectionImage.setAttribute('width', imageSize);
+                      sectionImage.setAttribute('height', imageSize);
+                      sectionImage.setAttribute('transform', `translate(${imageX} ${imageY}) rotate(${imageRot + 90}) translate(${-imageSize / 2} ${-imageSize / 2})`);
+                      sectionImage.setAttribute('href', section.image); 
+                      sectionImage.setAttributeNS(null, 'clip-path', 'url(#circle-clip)');
+            }
 
             // Section Text
             const textWidth = Math.abs(endAngle - startAngle) * radius;
@@ -195,7 +206,7 @@ export class SpinnerWheel extends HTMLElement {
             texts.push(sectionText);
 
             const sectionGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                  sectionGroup.append(pathElem, sectionText, sectionImage);
+                  sectionGroup.append(pathElem, sectionText);
 
             // Build Peg
             const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');

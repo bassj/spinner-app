@@ -2,7 +2,7 @@ import '../styles/settings-menu-styles.scss';
 import playerList from './player-list.js';
 import spinner from './spinner.js';
 
-import { getImageData } from '../util';
+import { getImageData, toggleButton } from '../util';
 
 class SectionSettings extends HTMLElement {
     _ul = this.querySelector('ul');
@@ -20,18 +20,15 @@ class SectionSettings extends HTMLElement {
 
         const lis = Array.from(this._ul.querySelectorAll('li'));
 
-        console.log(lis);
-
         for (const li of lis) {
             const section = { 
                 size: li.querySelector('[type="number"]').value, 
-                color: li.querySelector('[type="color"]').value,
                 text: li.querySelector('[type="text"]').value,
                 image: null
             };
 
             const image = li.querySelector('[type="file"]').files[0];
-            
+
             if (image) {
                 const cnvSize = 200;
                 const imgData = await getImageData(image);
@@ -47,12 +44,8 @@ class SectionSettings extends HTMLElement {
                 const imgY = (cnvSize - imgHeight) / 2;
                 const imgX = (cnvSize - imgWidth) / 2;
 
-                console.log(imgWidth);
-                console.log(imgHeight);
-
                 const ctx = cnv.getContext('2d');
                       ctx.drawImage(imgData, imgX, imgY, imgWidth, imgHeight);
-                
                 section.image = cnv.toDataURL();
             }
 
@@ -62,12 +55,12 @@ class SectionSettings extends HTMLElement {
         return values;
     }
 
-    _buildSettingForm({ size, color }) {
+    _buildSettingForm({ size, text }) {
         const tpl = this._template.content.cloneNode(true);
         const li = tpl.querySelector('li');
 
-        const colorPicker = li.querySelector('input[type="color"]');
-              colorPicker.value = color;
+        const textInput = li.querySelector('input[type="text"]');
+              textInput.value = text;
 
         const sizePicker = li.querySelector('input[type="number"]');
               sizePicker.value = size;
@@ -93,10 +86,92 @@ class SectionSettings extends HTMLElement {
 
 window.customElements.define('section-settings', SectionSettings);
 
+class ColorPicker extends HTMLElement {
+    _input = null;
+    _label = null;
+    _delBtn = null;
+
+    connectedCallback() {
+        this._input = document.createElement('input');
+        this._input.setAttribute('type', 'color');
+
+        this._label = document.createElement('label');
+        this._label.append(this._input);
+
+        this.append(this._label);
+
+        this._delBtn = document.createElement('button');
+        this._delBtn.classList = 'delete-btn';
+        this._delBtn.setAttribute('type', 'button');
+        this._delBtn.addEventListener('click', (e) => {
+            if (e.buttons) return;
+            this.remove();
+            document.querySelector('color-settings')
+                .dispatchEvent(new Event('input', { bubbles: true }));
+        });
+
+        this.append(this._delBtn);
+
+        this._input.addEventListener('input', () => this.#setBGColor());
+    }
+
+    set value(value) {
+        this._input.value = value;
+        this.#setBGColor();
+    }
+
+    get value() {
+        return this._input.value;
+    }
+
+    #setBGColor() {
+        this._label.style.backgroundColor = this.value;
+    }
+}
+
+window.customElements.define('color-picker', ColorPicker);
+
+class ColorSettings extends HTMLElement {
+    #colorList   = this.querySelector('ul.section-colors');
+    #addColorBtn = this.querySelector('.add-color-btn');
+    #delColorBtn = toggleButton(this.querySelector('.delete-color-btn'));
+
+    connectedCallback() {
+        this.#addColorBtn.addEventListener('click', (e) => {
+            if (e.buttons) return;
+            const picker = new ColorPicker();
+            this.#colorList.append(picker);
+            picker.value = "#FFFFFF";
+            this.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+
+        this.#delColorBtn.addEventListener('toggle', () => {
+            this.dataset.deleteMode = this.#delColorBtn.pressed;
+        });
+    }
+
+    set value(value) {
+        this.#colorList.innerHTML = "";
+        for (const color of value) {
+            const colorPicker = document.createElement('color-picker');
+            this.#colorList.append(colorPicker);
+            colorPicker.value = color;
+        }
+    }
+
+    get value() {
+        const pickers = Array.from(this.#colorList.querySelectorAll('color-picker'));
+        return pickers.map((p) => p.value);
+    }
+}
+
+window.customElements.define('color-settings', ColorSettings);
+
 class SettingsMenu extends HTMLElement {
-    _settingsPopup = this.querySelector('.settings-popup');
-    _menuButton    = this.querySelector('button.settings-menu');
+    _settingsPopup   = this.querySelector('.settings-popup');
+    _menuButton      = this.querySelector('button.settings-menu');
     _sectionSettings = this.querySelector('section-settings');
+    _colorSettings   = this.querySelector('color-settings');
     _open = false;
 
     connectedCallback() {
@@ -110,7 +185,8 @@ class SettingsMenu extends HTMLElement {
         playerList.hidden = true;
         this._settingsPopup.hidden = false;
 
-        this._sectionSettings.value = spinner.sectionsMeta;
+        this._sectionSettings.value = spinner.settings.sections;
+        this._colorSettings.value = spinner.settings.colors;
     }
 
     _closeSettingsMenu() {
@@ -120,8 +196,8 @@ class SettingsMenu extends HTMLElement {
     }
 
     async getSettings() {
-        console.log('getsettings');
         return {
+            colors: this._colorSettings.value,
             sections: await this._sectionSettings.getValue()
         };
     }

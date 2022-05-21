@@ -33,6 +33,7 @@ class RoomTitle extends HTMLElement {
         this._header.removeAttribute('contenteditable');
         this._header.removeAttribute('role');
         this._editing = false;
+        this._header.blur();
     }
 
     _updateWindowTitle() {

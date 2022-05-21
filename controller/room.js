@@ -23,15 +23,16 @@ class Room {
     name           = null;
     settings       = {
         sections: [
-            { size: 1, color: '#efefef', text: '' },
-            { size: 1, color: '#cfcfcf', text: '' },
-            { size: 1, color: '#efefef', text: '' },
-            { size: 1, color: '#cfcfcf', text: '' },
-            { size: 1, color: '#efefef', text: '' },
-            { size: 1, color: '#cfcfcf', text: '' },
-            { size: 1, color: '#efefef', text: '' },
-            { size: 1, color: '#cfcfcf', text: '' },
-        ]
+            { size: 1, text: 'One' },
+            { size: 1, text: 'Two' },
+            { size: 1, text: 'Three' },
+            { size: 1, text: 'Four' },
+            { size: 1, text: 'Five' },
+            { size: 1, text: 'Six' },
+            { size: 1, text: 'Seven' },
+            { size: 1, text: 'Eight' },
+        ],
+        colors: ['#efefef', '#cfcfcf']
     };
 
     constructor(name, creator) {

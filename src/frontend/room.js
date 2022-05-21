@@ -37,7 +37,6 @@ function connectToRoom() {
 
     if (isCreator) {
         settingsMenu.addEventListener('input', async (e) => {
-            console.log('input');
             socket.emit('room_settings', await settingsMenu.getSettings());
         });
 
@@ -69,6 +68,7 @@ function connectToRoom() {
 
     socket.on('room_settings', (settings) => {
         spinner.setSections(settings.sections)
+        spinner.setColors(settings.colors);
     });
 
     socket.on('room_title', (title) => {
