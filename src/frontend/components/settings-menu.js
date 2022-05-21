@@ -65,20 +65,26 @@ class SectionSettings extends HTMLElement {
         const sizePicker = li.querySelector('input[type="number"]');
               sizePicker.value = size;
 
+        const onDelete = (e) => {
+            if (e.buttons) return;
+            li.remove();
+            this.dispatchEvent(new Event('input', { bubbles: true }));
+        };
+
+        const onClone = (e) => {
+              if (e.buttons) return;
+              const clone = li.cloneNode(true);
+                    clone.querySelector('button.clone-btn').addEventListener('click', onClone);
+                    clone.querySelector('button.delete-btn').addEventListener('click', onDelete);
+              this._ul.append(clone);
+              this.dispatchEvent(new Event('input', { bubbles: true }));
+         };
+
         const deleteBtn = li.querySelector('button.delete-btn');
-              deleteBtn.addEventListener('click', (e) => {
-                  if (e.buttons) return;
-                  li.remove();
-                  this.dispatchEvent(new Event('input', { bubbles: true }));
-              });
+              deleteBtn.addEventListener('click', onDelete); 
 
         const cloneBtn = li.querySelector('button.clone-btn');
-              cloneBtn.addEventListener('click', (e) => {
-                  if (e.buttons) return;
-                  const clone = li.cloneNode(true);
-                  this._ul.append(clone);
-                  this.dispatchEvent(new Event('input', { bubbles: true }));
-              });
+              cloneBtn.addEventListener('click', onClone);
 
         return li;
     }

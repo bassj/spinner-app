@@ -60,7 +60,6 @@ export class SpinnerWheel extends HTMLElement {
     }
 
     setSections(sections) {
-        console.log(sections);
         this.settings.sections = sections;
         this.sectionContainer.innerHTML = "";
         this.buildSections();
