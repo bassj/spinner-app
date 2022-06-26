@@ -111,9 +111,7 @@ class SectionSettings extends HTMLElement {
         sizePicker.value = size;
 
         const fileInput = li.querySelector('input[type="file"]');
-        fileInput.addEventListener('input', (e) => {
-            console.log('asdf');
-            console.log(e);
+        fileInput.addEventListener('input', () => {
             fileInput.dataset.dirty = 'true';
         });
 

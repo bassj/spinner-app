@@ -38,7 +38,7 @@ export class SpinnerWheel extends HTMLElement {
     angularVelocity = 0;
     rotation = 0;
 
-    clickSound = new Audio('/static/click.mp3');
+    clickSound = new Audio('/assets/click.mp3');
     imageSize = 10;
 
     // Child elements

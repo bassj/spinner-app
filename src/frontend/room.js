@@ -1,13 +1,13 @@
-import './styles/theme-styles.scss';
 import './styles/spinner-styles.scss';
+import './styles/theme-styles.scss';
 
 import { io } from 'socket.io-client';
 
-import spinner from './components/spinner'; 
+import authDialog from './components/auth-dialog'; 
 import playerList from './components/player-list';
-import authDialog from './components/auth-dialog';
-import settingsMenu from './components/settings-menu';
 import roomTitle from './components/room-title';
+import settingsMenu from './components/settings-menu';
+import spinner from './components/spinner';
 
 const isCreator = document.body.dataset.creator == 'true';
 
@@ -18,6 +18,9 @@ if (document.body.dataset.reconnect == 'true') {
     authDialog.show();
 }
 
+/**
+ * Connect to the room.
+ */
 function connectToRoom() {
     const user_id = document.body.dataset.userId;
     const socket = io(window.location.pathname);
@@ -99,8 +102,8 @@ function connectToRoom() {
         roomTitle.title = title;
     });
 
-    socket.on('kick', (kick_message) => {
-        console.log(kick_message);
+    socket.on('kick', (_kick_message) => {
+        // TODO: Display kick message to user. 
     });
 
     socket.on('tick', onServerTick);
@@ -116,6 +119,6 @@ function connectToRoom() {
     // TODO: Show disconnect reason.
     //eslint-disable-next-line no-unused-vars
     socket.on('disconnect', (reason) => {
-        console.log('disconnect'); // Handle disconnect
+        // Handle disconnect
     });
 }

@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     PORT: 8080,
     DEBUG: process.env.NODE_ENV != 'production',
     SECRET: 'n-fBRt4Xy^:&x`gk',
