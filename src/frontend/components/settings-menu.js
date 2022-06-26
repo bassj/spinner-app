@@ -5,17 +5,37 @@ import spinner from './spinner.js';
 import { getImageData, toggleButton } from '../util';
 
 class SectionSettings extends HTMLElement {
+    _images = [];
     _ul = this.querySelector('ul');
     _template = this._ul.querySelector('template');
 
     set value(val) {
         this._ul.innerHTML = '';
         this._ul.append(
-            ...val.map((e) => this._buildSettingForm(e))
+            ...val.map((e, index) => this.#buildSettingForm(index, e))
         );
     }
 
-    async getValue() {
+    async getImages() {
+        let images = this.#getSavedImages();
+        const lis = Array.from(this._ul.querySelectorAll('li'));
+
+        for (const [index, li] of lis.entries()) {
+            const imgField = li.querySelector('[type="file"]');
+            const image = imgField.files[0];
+
+            if (image && imgField.dataset.dirty == "true") {
+                imgField.dataset.dirty = "false";
+                images[index] = await getImageData(image, 200);
+            }
+        }
+
+        this.#saveImages(images);
+
+        return images;
+    }
+
+    get value() {
         let values = [];
 
         const lis = Array.from(this._ul.querySelectorAll('li'));
@@ -27,37 +47,63 @@ class SectionSettings extends HTMLElement {
                 image: null
             };
 
-            const image = li.querySelector('[type="file"]').files[0];
-
-            if (image) {
-                const cnvSize = 200;
-                const imgData = await getImageData(image);
-                const cnv = document.createElement('canvas');
-                      cnv.width = cnvSize;
-                      cnv.height = cnvSize;
-
-                const aspect = imgData.width / imgData.height;
-
-
-                const imgWidth = (aspect > 1) ? cnvSize * aspect : cnvSize; 
-                const imgHeight = (aspect < 1) ? cnvSize / aspect : cnvSize;
-                const imgY = (cnvSize - imgHeight) / 2;
-                const imgX = (cnvSize - imgWidth) / 2;
-
-                const ctx = cnv.getContext('2d');
-                      ctx.drawImage(imgData, imgX, imgY, imgWidth, imgHeight);
-                section.image = cnv.toDataURL();
-            }
-
             values.push(section);
         }
 
         return values;
     }
 
-    _buildSettingForm({ size, text }) {
+    #saveImages(images) {
+        this._images = images;
+    }
+
+    #getSavedImages() { 
+        return this._images;
+    }
+
+    _deleteImage(index) {
+        if (!window.sessionStorage.getItem('images')) return;
+        const images = JSON.parse(window.sessionStorage.getItem('images'));
+
+        delete images[index];
+
+        for (const [image_index, element] of Object.entries(images)) {
+            if (image_index <= index) continue;
+            images[image_index - 1] = element;
+            delete images[image_index];
+        }
+
+        window.sessionStorage.setItem('images', JSON.stringify(images));
+
+        this.#updateLiIndices();
+    }
+
+    _cloneImage(index) {
+        if (!window.sessionStorage.getItem('images')) return;
+        const images = JSON.parse(window.sessionStorage.getItem('images'));
+
+        const new_index = Object.entries(images).length;
+        const image = images[index];
+
+        images[new_index] = images[index]
+
+        window.sessionStorage.setItem('images', JSON.stringify(images));
+
+        this.#updateLiIndices();
+    }
+
+    #updateLiIndices() {
+        const lis = Array.from(this._ul.querySelectorAll('li'));
+
+        for (const [index, li] of Object.entries(lis)) {
+            li.dataset.index = index;
+        }
+    }
+
+    #buildSettingForm(index, { size, text }) {
         const tpl = this._template.content.cloneNode(true);
         const li = tpl.querySelector('li');
+              li.dataset.index = index;
 
         const textInput = li.querySelector('input[type="text"]');
               textInput.value = text;
@@ -65,26 +111,37 @@ class SectionSettings extends HTMLElement {
         const sizePicker = li.querySelector('input[type="number"]');
               sizePicker.value = size;
 
-        const onDelete = (e) => {
+        const fileInput = li.querySelector('input[type="file"]');
+              fileInput.addEventListener('input', (e) => {
+                  console.log('asdf');
+                  console.log(e);
+                  fileInput.dataset.dirty = "true";
+              });
+
+        const settingsForm = this;
+
+        const onDelete = function (e) {
             if (e.buttons) return;
-            li.remove();
-            this.dispatchEvent(new Event('input', { bubbles: true }));
+            this.remove();
+            settingsForm._deleteImage(index);
+            settingsForm.dispatchEvent(new CustomEvent('delete', { bubbles: true, detail: index }));
         };
 
-        const onClone = (e) => {
+        const onClone = function (e) {
               if (e.buttons) return;
-              const clone = li.cloneNode(true);
-                    clone.querySelector('button.clone-btn').addEventListener('click', onClone);
-                    clone.querySelector('button.delete-btn').addEventListener('click', onDelete);
-              this._ul.append(clone);
-              this.dispatchEvent(new Event('input', { bubbles: true }));
+              const clone = this.cloneNode(true);
+                    clone.querySelector('button.clone-btn').addEventListener('click', onClone.bind(clone));
+                    clone.querySelector('button.delete-btn').addEventListener('click', onDelete.bind(clone));
+              settingsForm._cloneImage(index);
+              settingsForm._ul.append(clone);
+              settingsForm.dispatchEvent(new CustomEvent('clone', { bubbles: true }));
          };
 
         const deleteBtn = li.querySelector('button.delete-btn');
-              deleteBtn.addEventListener('click', onDelete); 
+              deleteBtn.addEventListener('click', onDelete.bind(li)); 
 
         const cloneBtn = li.querySelector('button.clone-btn');
-              cloneBtn.addEventListener('click', onClone);
+              cloneBtn.addEventListener('click', onClone.bind(li));
 
         return li;
     }
@@ -201,11 +258,15 @@ class SettingsMenu extends HTMLElement {
         this._settingsPopup.hidden = true;
     }
 
-    async getSettings() {
+    getSettings() {
         return {
             colors: this._colorSettings.value,
-            sections: await this._sectionSettings.getValue()
+            sections: this._sectionSettings.value
         };
+    }
+
+    async getImages() {
+        return await this._sectionSettings.getImages();
     }
 }
 
