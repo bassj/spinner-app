@@ -19,7 +19,6 @@ if (document.body.dataset.reconnect == "true") {
 }
 
 function connectToRoom() {
-    const spinner = document.querySelector('spinner-wheel');
     const user_id = document.body.dataset.userId;
     const socket = io(window.location.pathname);
 
@@ -37,7 +36,28 @@ function connectToRoom() {
 
     if (isCreator) {
         settingsMenu.addEventListener('input', async (e) => {
-            socket.emit('room_settings', await settingsMenu.getSettings());
+            socket.emit('room_settings', settingsMenu.getSettings());
+            const roomImages = await settingsMenu.getImages();
+
+            if (Object.keys(roomImages).length) {
+                socket.emit('room_images', roomImages);
+            }
+        });
+
+        settingsMenu.addEventListener('delete', async (e) => {
+            socket.emit('room_settings', settingsMenu.getSettings());
+            const roomImages = await settingsMenu.getImages();
+            if (Object.keys(roomImages).length) {
+                socket.emit('room_images', roomImages);
+            }
+        });
+
+        settingsMenu.addEventListener('clone', async (e) => {
+            socket.emit('room_settings', settingsMenu.getSettings());
+            const roomImages = await settingsMenu.getImages();
+            if (Object.keys(roomImages).length) {
+                socket.emit('room_images', roomImages);
+            }
         });
 
         roomTitle.addEventListener('input', (e) => {
@@ -69,6 +89,10 @@ function connectToRoom() {
     socket.on('room_settings', (settings) => {
         spinner.setSections(settings.sections)
         spinner.setColors(settings.colors);
+    });
+
+    socket.on('room_images', (images) => {
+        spinner.setImages(images);
     });
 
     socket.on('room_title', (title) => {

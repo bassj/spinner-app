@@ -1,4 +1,5 @@
 const express = require('express');
+
 const { 
     createRoom,
     getRoom,
@@ -67,7 +68,7 @@ module.exports = (csrf, io, sessionMiddleware) => {
         try {
             await room.join({ user_id, display_name }, room_password);
             req.session.display_name = display_name;
-            await req.session.save();
+            req.session.save();
             return res.sendStatus(203);
         } catch (e) {
             if (e.type == 'invalid_password') {
@@ -150,6 +151,7 @@ module.exports = (csrf, io, sessionMiddleware) => {
         }
 
         sock.emit('room_settings', room.settings);
+        // sock.emit('room_images', room.images);
     });
 
     return router;

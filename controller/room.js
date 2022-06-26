@@ -21,6 +21,7 @@ class Room {
     creator        = null;
     controller     = null;
     name           = null;
+    images         = {};
     settings       = {
         sections: [
             { size: 1, text: 'One' },
@@ -39,7 +40,7 @@ class Room {
         this.name = name;
         this.creator = creator;
     }
-    
+
     get password() {
         return this.password_hash;
     }
