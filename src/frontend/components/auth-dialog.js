@@ -1,4 +1,5 @@
 import '../styles/auth-dialog-styles.scss';
+import dialogPolyfill from '../../../node_modules/dialog-polyfill/dist/dialog-polyfill.esm.js';
 
 export class AuthDialog extends HTMLElement {
    dialog   = null;
@@ -9,6 +10,7 @@ export class AuthDialog extends HTMLElement {
         this.dialog  = this.querySelector('dialog');
         this.form    = this.querySelector('form');
         this.erorMsg = this.querySelector('p.error-message');
+        dialogPolyfill.registerDialog(this.dialog);
     }
 
     onAuth(callback) {
