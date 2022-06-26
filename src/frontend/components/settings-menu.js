@@ -24,8 +24,8 @@ class SectionSettings extends HTMLElement {
             const imgField = li.querySelector('[type="file"]');
             const image = imgField.files[0];
 
-            if (image && imgField.dataset.dirty == "true") {
-                imgField.dataset.dirty = "false";
+            if (image && imgField.dataset.dirty == 'true') {
+                imgField.dataset.dirty = 'false';
                 images[index] = await getImageData(image, 200);
             }
         }
@@ -83,9 +83,8 @@ class SectionSettings extends HTMLElement {
         const images = JSON.parse(window.sessionStorage.getItem('images'));
 
         const new_index = Object.entries(images).length;
-        const image = images[index];
 
-        images[new_index] = images[index]
+        images[new_index] = images[index];
 
         window.sessionStorage.setItem('images', JSON.stringify(images));
 
@@ -103,20 +102,20 @@ class SectionSettings extends HTMLElement {
     #buildSettingForm(index, { size, text }) {
         const tpl = this._template.content.cloneNode(true);
         const li = tpl.querySelector('li');
-              li.dataset.index = index;
+        li.dataset.index = index;
 
         const textInput = li.querySelector('input[type="text"]');
-              textInput.value = text;
+        textInput.value = text;
 
         const sizePicker = li.querySelector('input[type="number"]');
-              sizePicker.value = size;
+        sizePicker.value = size;
 
         const fileInput = li.querySelector('input[type="file"]');
-              fileInput.addEventListener('input', (e) => {
-                  console.log('asdf');
-                  console.log(e);
-                  fileInput.dataset.dirty = "true";
-              });
+        fileInput.addEventListener('input', (e) => {
+            console.log('asdf');
+            console.log(e);
+            fileInput.dataset.dirty = 'true';
+        });
 
         const settingsForm = this;
 
@@ -128,20 +127,20 @@ class SectionSettings extends HTMLElement {
         };
 
         const onClone = function (e) {
-              if (e.buttons) return;
-              const clone = this.cloneNode(true);
-                    clone.querySelector('button.clone-btn').addEventListener('click', onClone.bind(clone));
-                    clone.querySelector('button.delete-btn').addEventListener('click', onDelete.bind(clone));
-              settingsForm._cloneImage(index);
-              settingsForm._ul.append(clone);
-              settingsForm.dispatchEvent(new CustomEvent('clone', { bubbles: true }));
-         };
+            if (e.buttons) return;
+            const clone = this.cloneNode(true);
+            clone.querySelector('button.clone-btn').addEventListener('click', onClone.bind(clone));
+            clone.querySelector('button.delete-btn').addEventListener('click', onDelete.bind(clone));
+            settingsForm._cloneImage(index);
+            settingsForm._ul.append(clone);
+            settingsForm.dispatchEvent(new CustomEvent('clone', { bubbles: true }));
+        };
 
         const deleteBtn = li.querySelector('button.delete-btn');
-              deleteBtn.addEventListener('click', onDelete.bind(li)); 
+        deleteBtn.addEventListener('click', onDelete.bind(li)); 
 
         const cloneBtn = li.querySelector('button.clone-btn');
-              cloneBtn.addEventListener('click', onClone.bind(li));
+        cloneBtn.addEventListener('click', onClone.bind(li));
 
         return li;
     }
@@ -204,7 +203,7 @@ class ColorSettings extends HTMLElement {
             if (e.buttons) return;
             const picker = new ColorPicker();
             this.#colorList.append(picker);
-            picker.value = "#FFFFFF";
+            picker.value = '#FFFFFF';
             this.dispatchEvent(new Event('input', { bubbles: true }));
         });
 
@@ -214,7 +213,7 @@ class ColorSettings extends HTMLElement {
     }
 
     set value(value) {
-        this.#colorList.innerHTML = "";
+        this.#colorList.innerHTML = '';
         for (const color of value) {
             const colorPicker = document.createElement('color-picker');
             this.#colorList.append(colorPicker);

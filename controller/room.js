@@ -81,7 +81,7 @@ class Room {
 
     async join({user_id, display_name}, password) {
         const authed = (!this.password_hash) 
-            || (await bcrypt.compare(password || "", this.password_hash))
+            || (await bcrypt.compare(password || '', this.password_hash))
             || user_id === this.creator;
 
         if (!authed) {

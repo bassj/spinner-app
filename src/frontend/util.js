@@ -1,13 +1,13 @@
 function _getImageData(file) {
     return new Promise((resolve, reject) => {
         const fr = new FileReader();
-              fr.onload = () => {
-                  createImageBitmap(new Blob([fr.result])).then((img) => {
-                      resolve(img);
-                  }).catch(reject);
-              };
-            fr.onerror = reject;
-            fr.readAsArrayBuffer(file);
+        fr.onload = () => {
+            createImageBitmap(new Blob([fr.result])).then((img) => {
+                resolve(img);
+            }).catch(reject);
+        };
+        fr.onerror = reject;
+        fr.readAsArrayBuffer(file);
     });
 }
 
@@ -23,10 +23,10 @@ export async function getImageData(file, new_size = null) {
     const imgX = (new_size - imgWidth) / 2;
 
     const cnv = document.createElement('canvas');
-          cnv.width  = new_size;
-          cnv.height = new_size;
+    cnv.width  = new_size;
+    cnv.height = new_size;
     const ctx = cnv.getContext('2d');
-          ctx.drawImage(imgData, imgX, imgY, imgWidth, imgHeight);
+    ctx.drawImage(imgData, imgX, imgY, imgWidth, imgHeight);
 
     return cnv.toDataURL();
 }
@@ -34,18 +34,18 @@ export async function getImageData(file, new_size = null) {
 export function toggleButton(button) {
     let _pressed = false;
 
-    button.setAttribute("aria-pressed", _pressed);
+    button.setAttribute('aria-pressed', _pressed);
 
-    button.addEventListener('click', (e) => {
+    button.addEventListener('click', () => {
         _pressed = !_pressed;
-        button.setAttribute("aria-pressed", _pressed);
+        button.setAttribute('aria-pressed', _pressed);
         button.dispatchEvent(new CustomEvent('toggle'));
         button.dispatchEvent(new CustomEvent(_pressed ? 'pressed' : 'unpressed'));
     });
 
     Object.defineProperty(button, 'pressed', {
         get: function () { return _pressed; },
-        set: function (p) { _pressed = p; button.setAttribute("aria-pressed", _pressed); }
+        set: function (p) { _pressed = p; button.setAttribute('aria-pressed', _pressed); }
     });
 
     return button;

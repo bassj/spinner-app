@@ -9,9 +9,9 @@ import authDialog from './components/auth-dialog';
 import settingsMenu from './components/settings-menu';
 import roomTitle from './components/room-title';
 
-const isCreator = document.body.dataset.creator == "true";
+const isCreator = document.body.dataset.creator == 'true';
 
-if (document.body.dataset.reconnect == "true") {
+if (document.body.dataset.reconnect == 'true') {
     connectToRoom();
 } else {
     authDialog.onAuth(connectToRoom);
@@ -22,7 +22,7 @@ function connectToRoom() {
     const user_id = document.body.dataset.userId;
     const socket = io(window.location.pathname);
 
-    const onTick = (e) => {
+    const onTick = () => {
         socket.emit('tick', {
             angularVelocity: spinner.angularVelocity,
             rotation: spinner.rotation
@@ -35,7 +35,7 @@ function connectToRoom() {
     };
 
     if (isCreator) {
-        settingsMenu.addEventListener('input', async (e) => {
+        settingsMenu.addEventListener('input', async () => {
             socket.emit('room_settings', settingsMenu.getSettings());
             const roomImages = await settingsMenu.getImages();
 
@@ -44,7 +44,7 @@ function connectToRoom() {
             }
         });
 
-        settingsMenu.addEventListener('delete', async (e) => {
+        settingsMenu.addEventListener('delete', async () => {
             socket.emit('room_settings', settingsMenu.getSettings());
             const roomImages = await settingsMenu.getImages();
             if (Object.keys(roomImages).length) {
@@ -52,7 +52,7 @@ function connectToRoom() {
             }
         });
 
-        settingsMenu.addEventListener('clone', async (e) => {
+        settingsMenu.addEventListener('clone', async () => {
             socket.emit('room_settings', settingsMenu.getSettings());
             const roomImages = await settingsMenu.getImages();
             if (Object.keys(roomImages).length) {
@@ -60,7 +60,7 @@ function connectToRoom() {
             }
         });
 
-        roomTitle.addEventListener('input', (e) => {
+        roomTitle.addEventListener('input', () => {
             socket.emit('room_title', roomTitle.title);
         });
     }
@@ -75,7 +75,7 @@ function connectToRoom() {
             spinner.controlling = false;
             socket.on('tick', onServerTick);
         }
-    }
+    };
 
     socket.on('set_controller', ( { controller_id, display_name } ) => {
         playerList.setController({ controller_id, display_name });
@@ -87,7 +87,7 @@ function connectToRoom() {
     });
 
     socket.on('room_settings', (settings) => {
-        spinner.setSections(settings.sections)
+        spinner.setSections(settings.sections);
         spinner.setColors(settings.colors);
     });
 
@@ -106,13 +106,15 @@ function connectToRoom() {
     socket.on('tick', onServerTick);
 
     socket.on('players', (players) => {
-       playerList.players = players;
+        playerList.players = players;
     });
 
     socket.on('connect', () => {
         spinner.controlling = false;
     });
 
+    // TODO: Show disconnect reason.
+    //eslint-disable-next-line no-unused-vars
     socket.on('disconnect', (reason) => {
         console.log('disconnect'); // Handle disconnect
     });

@@ -1,6 +1,6 @@
 import '../styles/player-list-styles.scss';
 
-const is_creator = document.body.dataset.creator === "true";
+const is_creator = document.body.dataset.creator === 'true';
 const my_user_id    = document.body.dataset.userId;
 
 export class PlayerList extends HTMLElement {
@@ -14,15 +14,15 @@ export class PlayerList extends HTMLElement {
 
     _createPlayerElem(display_name, user_id, controlling) {
         const elem = document.createElement('li');
-              elem.innerText = display_name;
-              elem.setAttribute('data-user-id', user_id);
+        elem.innerText = display_name;
+        elem.setAttribute('data-user-id', user_id);
 
         if (controlling) elem.setAttribute('controlling', true);
 
         const btnSetController = document.createElement('button');
-              btnSetController.classList = 'set-controller';
-              btnSetController.setAttribute('title', controlling ? `${display_name} is controlling` : 'Set Controller');
-              btnSetController.disabled = !is_creator;
+        btnSetController.classList = 'set-controller';
+        btnSetController.setAttribute('title', controlling ? `${display_name} is controlling` : 'Set Controller');
+        btnSetController.disabled = !is_creator;
 
         elem.append(btnSetController);
 
@@ -61,13 +61,13 @@ export class PlayerList extends HTMLElement {
 
         const can_use_buttons = (controller_id === my_user_id || is_creator);
         this.ul.querySelectorAll('li button')
-               .forEach((btn) => { 
-                   if (can_use_buttons) {
-                       btn.removeAttribute('disabled');
-                   } else {
-                       btn.setAttribute('disabled', true);
-                   }
-               });
+            .forEach((btn) => { 
+                if (can_use_buttons) {
+                    btn.removeAttribute('disabled');
+                } else {
+                    btn.setAttribute('disabled', true);
+                }
+            });
     }
 
     get players() {

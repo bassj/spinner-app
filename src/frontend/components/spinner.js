@@ -18,7 +18,7 @@ export class SpinnerWheel extends HTMLElement {
             { size: 1, text: 'Eight' },
         ],
         colors: [lightGray, darkGray]
-    }
+    };
 
     images = {};
 
@@ -50,12 +50,12 @@ export class SpinnerWheel extends HTMLElement {
 
     connectedCallback() {
         const circleClip = document.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
-              circleClip.setAttribute('id', 'circle-clip');
+        circleClip.setAttribute('id', 'circle-clip');
         const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-              circle.setAttribute('r', this.imageSize / 2);
-              circle.setAttribute('cx', this.imageSize / 2);
-              circle.setAttribute('cy', this.imageSize / 2);
-              circle.setAttribute('fill', '#000000');
+        circle.setAttribute('r', this.imageSize / 2);
+        circle.setAttribute('cx', this.imageSize / 2);
+        circle.setAttribute('cy', this.imageSize / 2);
+        circle.setAttribute('fill', '#000000');
         circleClip.append(circle);
 
         this.#svgDefs.append(circleClip);
@@ -77,19 +77,19 @@ export class SpinnerWheel extends HTMLElement {
 
     setImages(images) {
         this.images = images;
-        this.#imageContainer.innerHTML = "";
+        this.#imageContainer.innerHTML = '';
         this.#buildImages();
     }
 
     setSections(sections) {
         this.settings.sections = sections;
-        this.#sectionContainer.innerHTML = "";
+        this.#sectionContainer.innerHTML = '';
         this.#buildSections();
     }
 
     setColors(colors) {
         this.settings.colors = colors;
-        this.#sectionContainer.innerHTML = "";
+        this.#sectionContainer.innerHTML = '';
         this.#buildSections();
     }
 
@@ -143,7 +143,6 @@ export class SpinnerWheel extends HTMLElement {
     }
 
     #buildSections() {
-        const numSections = this.settings.sections.length;
         const totalFrUnits = this.settings.sections.reduce((acc, val) => (acc + parseInt(val.size)), 0);
         const radius = 32;
 
@@ -173,46 +172,46 @@ export class SpinnerWheel extends HTMLElement {
             const textPath = `M${startPos} A ${radius} ${radius} 0 ${largeArc} 1 ${endPos}`;
 
             const pathElem = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                  pathElem.setAttribute('d', path);
-                  pathElem.setAttribute('fill', bgColor);
+            pathElem.setAttribute('d', path);
+            pathElem.setAttribute('fill', bgColor);
 
             const textPathElem = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                  textPathElem.setAttribute('id', `p-${index}`);
-                  textPathElem.setAttribute('d', textPath);
+            textPathElem.setAttribute('id', `p-${index}`);
+            textPathElem.setAttribute('d', textPath);
 
             this.#svgDefs.append(textPathElem);
 
             // Section Text
             const textWidth = Math.abs(endAngle - startAngle) * radius;
             const sectionText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                  sectionText.setAttributeNS(null, 'width', textWidth);
-                  sectionText.setAttributeNS(null, 'dy', 5);
-                  sectionText.setAttributeNS(null, 'font-size', 5);
-                  sectionText.setAttributeNS(null, 'lengthAdjust', 'spacingAndGlyphs');
+            sectionText.setAttributeNS(null, 'width', textWidth);
+            sectionText.setAttributeNS(null, 'dy', 5);
+            sectionText.setAttributeNS(null, 'font-size', 5);
+            sectionText.setAttributeNS(null, 'lengthAdjust', 'spacingAndGlyphs');
 
             const sectionTextPath = document.createElementNS('http://www.w3.org/2000/svg', 'textPath');
-                  sectionTextPath.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", `#p-${index}`);
-                  sectionTextPath.setAttributeNS(null, "startOffset", "50%");
-                  sectionTextPath.setAttributeNS(null, "text-anchor", "middle");
-                  sectionTextPath.append(document.createTextNode(section.text));
+            sectionTextPath.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', `#p-${index}`);
+            sectionTextPath.setAttributeNS(null, 'startOffset', '50%');
+            sectionTextPath.setAttributeNS(null, 'text-anchor', 'middle');
+            sectionTextPath.append(document.createTextNode(section.text));
 
             sectionText.append(sectionTextPath);
             texts.push(sectionText);
 
             const sectionGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                  sectionGroup.append(pathElem, sectionText);
+            sectionGroup.append(pathElem, sectionText);
 
             // Build Peg
             const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                  group.setAttribute('transform', `translate(${Math.cos(startAngle) * (radius - 1)}, ${Math.sin(startAngle) * (radius - 1)})`);
-                  group.dataset.startAngle = startAngle;
+            group.setAttribute('transform', `translate(${Math.cos(startAngle) * (radius - 1)}, ${Math.sin(startAngle) * (radius - 1)})`);
+            group.dataset.startAngle = startAngle;
             const peg = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); 
-                  peg.setAttribute('r', 1);
-                  peg.setAttribute('fill', 'white');
+            peg.setAttribute('r', 1);
+            peg.setAttribute('fill', 'white');
             const shadow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                  shadow.setAttribute('r', 1);
-                  shadow.setAttribute('fill', '#000000ee');
-                  shadow.classList = 'shadow';
+            shadow.setAttribute('r', 1);
+            shadow.setAttribute('fill', '#000000ee');
+            shadow.classList = 'shadow';
             group.append(shadow, peg);
 
             pegs.push(group);
@@ -230,15 +229,14 @@ export class SpinnerWheel extends HTMLElement {
             this.#resizeSectionText();
 
             const cap = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                  cap.setAttribute('r', 1.6);
-                  cap.setAttribute('fill', 'black');
+            cap.setAttribute('r', 1.6);
+            cap.setAttribute('fill', 'black');
 
             this.#sectionContainer.append(cap);
         }
     }
 
     #buildImages() {
-        const numSections = this.settings.sections.length;
         const totalFrUnits = this.settings.sections.reduce((acc, val) => (acc + parseInt(val.size)), 0);
         const radius = 32;
 
@@ -262,11 +260,11 @@ export class SpinnerWheel extends HTMLElement {
             const imageRot = imageAngle * (180 / Math.PI);
 
             const sectionImage = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-                  sectionImage.setAttribute('width', this.imageSize);
-                  sectionImage.setAttribute('height', this.imageSize);
-                  sectionImage.setAttribute('transform', `translate(${imageX} ${imageY}) rotate(${imageRot + 90}) translate(${-this.imageSize / 2} ${-this.imageSize / 2})`);
-                  sectionImage.setAttribute('href', image); 
-                  sectionImage.setAttributeNS(null, 'clip-path', 'url(#circle-clip)');
+            sectionImage.setAttribute('width', this.imageSize);
+            sectionImage.setAttribute('height', this.imageSize);
+            sectionImage.setAttribute('transform', `translate(${imageX} ${imageY}) rotate(${imageRot + 90}) translate(${-this.imageSize / 2} ${-this.imageSize / 2})`);
+            sectionImage.setAttribute('href', image); 
+            sectionImage.setAttributeNS(null, 'clip-path', 'url(#circle-clip)');
 
             images.push(sectionImage);
             this.#imageContainer.append(sectionImage);
@@ -312,9 +310,9 @@ export class SpinnerWheel extends HTMLElement {
 
     updatePegShadows() {
         this.pegs.forEach((peg) => {
-            const tfm = peg.getAttribute('transform'); 
-            const [pegX, pegY] = tfm.match(/[0-9]+(\.[0-9]*)?/g).map((num) => (parseFloat(num)));
-            const pegAngle = parseFloat(peg.dataset.startAngle);
+            // const tfm = peg.getAttribute('transform'); 
+            // const [pegX, pegY] = tfm.match(/[0-9]+(\.[0-9]*)?/g).map((num) => (parseFloat(num)));
+            // const pegAngle = parseFloat(peg.dataset.startAngle);
             const shadow = peg.querySelector('.shadow');
 
             const offsetX = 0;
@@ -330,7 +328,7 @@ export class SpinnerWheel extends HTMLElement {
 
         const pegAngles = this.pegs.flatMap((peg) => {
             const pegAngle = parseFloat(peg.dataset.startAngle);
-            return [pegAngle, pegAngle - Math.PI * 2, pegAngle + Math.PI * 2 ]
+            return [pegAngle, pegAngle - Math.PI * 2, pegAngle + Math.PI * 2 ];
         });
 
         const pegDist = pegAngles.reduce((min, ang) => {
@@ -342,9 +340,9 @@ export class SpinnerWheel extends HTMLElement {
         if (fac > 0) {
             this.angularVelocity -= this.angularVelocity * this.physDelta;
             this.angularVelocity += (((pegDist < 0)? 1:-1) * fac * this.physDelta);
-       }
+        }
 
-       this.lastPegDist = pegDist;
+        this.lastPegDist = pegDist;
     }
 
     doTickAnim() {
@@ -352,7 +350,7 @@ export class SpinnerWheel extends HTMLElement {
 
         const pegAngles = this.pegs.flatMap((peg) => {
             const pegAngle = parseFloat(peg.dataset.startAngle);
-            return [pegAngle, pegAngle - Math.PI * 2, pegAngle + Math.PI * 2 ]
+            return [pegAngle, pegAngle - Math.PI * 2, pegAngle + Math.PI * 2 ];
         });
 
         const pegDist = pegAngles.reduce((min, ang) => {
@@ -364,13 +362,13 @@ export class SpinnerWheel extends HTMLElement {
         if (fac > 0) {
             if ((this.lastPegDist < 0 && pegDist > 0) || (this.lastPegDist > 0 && pegDist < 0)) {
                 const clone = this.clickSound.cloneNode();
-                      clone.play().then(() => clone.remove());
+                clone.play().then(() => clone.remove());
             }
 
             this.#ticker.rotation = ((pegDist > 0)? 1 : -1) * fac * 0.3;
-       }
+        }
 
-       this.lastPegDist = pegDist;
+        this.lastPegDist = pegDist;
     }
 
     handleGrab(e) {

@@ -9,7 +9,7 @@ class RoomTitle extends HTMLElement {
         this._editBtn.addEventListener('click', () => this._editTitle());
         this._header.addEventListener('blur', () => this._cancelEdit());
         this._header.addEventListener('keydown', (e) => (e.key == 'Enter') && this._cancelEdit());
-        this._header.addEventListener('input', (e) => this._updateWindowTitle());
+        this._header.addEventListener('input', () => this._updateWindowTitle());
     }
 
     _editTitle() {
@@ -20,10 +20,10 @@ class RoomTitle extends HTMLElement {
 
         // Move the mouse cursor to the last character.
         const range = document.createRange();
-              range.setStart(this._header.firstChild, this._header.innerText.length + 1);
+        range.setStart(this._header.firstChild, this._header.innerText.length + 1);
         const set = window.getSelection();
-              set.removeAllRanges();
-              set.addRange(range);
+        set.removeAllRanges();
+        set.addRange(range);
 
         this._editing = true;
     }

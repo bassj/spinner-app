@@ -2,9 +2,9 @@ import '../styles/auth-dialog-styles.scss';
 import dialogPolyfill from '../../../node_modules/dialog-polyfill/dist/dialog-polyfill.esm.js';
 
 export class AuthDialog extends HTMLElement {
-   dialog   = null;
-   form     = null;
-   errorMsg = null;
+    dialog   = null;
+    form     = null;
+    errorMsg = null;
 
     connectedCallback() {
         this.dialog  = this.querySelector('dialog');

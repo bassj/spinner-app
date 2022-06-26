@@ -6,7 +6,6 @@ const options       = require('./options');
 const multer        = require('multer');
 const crypto        = require('crypto');
 const csurf         = require('csurf');
-const https         = require('https');
 const http          = require('http');
 
 const sessionMiddleware = session({
@@ -19,7 +18,7 @@ const sessionMiddleware = session({
 const app = express();
 const http_server = http.createServer(app);
 const io  = new socketio.Server();
-      io.listen(http_server);
+io.listen(http_server);
 
 
 const csrf = csurf({ cookie: true });
