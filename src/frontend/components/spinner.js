@@ -48,6 +48,9 @@ export class SpinnerWheel extends HTMLElement {
     #imageContainer   = this.querySelector('svg g.images');
     #ticker           = document.querySelector('spinner-ticker');
 
+    /**
+     * Invoked each time the element is connected to the document.
+     */
     connectedCallback() {
         const circleClip = document.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
         circleClip.setAttribute('id', 'circle-clip');
@@ -75,32 +78,72 @@ export class SpinnerWheel extends HTMLElement {
         }, 1000.0 / 20.0);
     }
 
+    /**
+     * Set the images of the spinner.
+     *
+     * @param {Array<string>} images an array of base64 images to use for the spinner.
+     */
     setImages(images) {
         this.images = images;
         this.#imageContainer.innerHTML = '';
         this.#buildImages();
     }
 
+    /**
+     * An object representing the settings of a section of the wheel.
+     *
+     * @typedef {object} Section
+     * @property {string} text The text on the section.
+     * @property {number} size Relative size of the section.
+     */
+    /**
+     * Sets the sections of the wheel.
+     *
+     * @param {Array<Section>} sections The settings for each section of the wheel.
+     */
     setSections(sections) {
         this.settings.sections = sections;
         this.#sectionContainer.innerHTML = '';
         this.#buildSections();
     }
 
+    /**
+     * An object representing the color settings of a wheel.
+     *
+     * @typedef {Array<string>} Colors
+     */
+    /**
+     * Set the colors of the wheel.
+     *
+     * @param {Colors} colors The new color settings of th wheel.
+     */
     setColors(colors) {
         this.settings.colors = colors;
         this.#sectionContainer.innerHTML = '';
         this.#buildSections();
     }
 
+    /**
+     * Gets the number of sections since the last frame.
+     *
+     * @returns {number} seconds since the last frame.
+     */
     get delta() {
         return ((Date.now() - this.lastAnim) / 1000).toFixed(6);
     }
 
+    /**
+     * Gets the number of seconds since the last phys tick.
+     *
+     * @returns {number} seconds since the last phys tick.
+     */
     get physDelta() {
         return ((Date.now() - this.lastPhys) / 1000).toFixed(6);
     }
 
+    /**
+     * Does a physics tick.
+     */
     doPhys() {
         if (this.grabState.grabbed) {
             const startAngle = Math.atan2(this.grabState.startY, this.grabState.startX);
@@ -129,6 +172,9 @@ export class SpinnerWheel extends HTMLElement {
         this.lastPhys = Date.now();
     }
 
+    /**
+     * Update the spinner for this animation frame.
+     */
     doAnim() { 
         this.rotation += this.angularVelocity * this.delta;
         this.#svg.style.transform = `rotateZ(${this.rotation}rad)`;
@@ -142,6 +188,9 @@ export class SpinnerWheel extends HTMLElement {
         });
     }
 
+    /**
+     * Builds the sections of the spinner.
+     */
     #buildSections() {
         const totalFrUnits = this.settings.sections.reduce((acc, val) => (acc + parseInt(val.size)), 0);
         const radius = 32;
@@ -236,6 +285,9 @@ export class SpinnerWheel extends HTMLElement {
         }
     }
 
+    /**
+     * Builds the images of the spinner.
+     */
     #buildImages() {
         const totalFrUnits = this.settings.sections.reduce((acc, val) => (acc + parseInt(val.size)), 0);
         const radius = 32;
@@ -273,7 +325,16 @@ export class SpinnerWheel extends HTMLElement {
         this.secImages = images;
     }
 
+    /**
+     * Recalculates the sizing of the text for each section.
+     */
     #resizeSectionText() {
+        /**
+         * Roughly calculates the length of a given text path.
+         *
+         * @param {SVGTextPathElement} textPath The text path to measure.
+         * @returns {number} approximate length of the text path.
+         */
         const getTextLength = (textPath) => {
             let textLength = 0;
 
@@ -308,11 +369,11 @@ export class SpinnerWheel extends HTMLElement {
         }
     }
 
+    /**
+     * Updates the position of the shadows of each peg.
+     */
     updatePegShadows() {
         this.pegs.forEach((peg) => {
-            // const tfm = peg.getAttribute('transform'); 
-            // const [pegX, pegY] = tfm.match(/[0-9]+(\.[0-9]*)?/g).map((num) => (parseFloat(num)));
-            // const pegAngle = parseFloat(peg.dataset.startAngle);
             const shadow = peg.querySelector('.shadow');
 
             const offsetX = 0;
@@ -323,6 +384,9 @@ export class SpinnerWheel extends HTMLElement {
         });
     }
 
+    /**
+     * Do the physics calculations of the ticker for the given frame.
+     */
     doTickerPhys() {
         const normalizedRotation = 6.28 - (((this.rotation + Math.PI / 2) % (2 * Math.PI)) + (2 * Math.PI)) % (2 * Math.PI);
 
@@ -345,6 +409,9 @@ export class SpinnerWheel extends HTMLElement {
         this.lastPegDist = pegDist;
     }
 
+    /**
+     * Update the positions of the ticker for the given frame.
+     */
     doTickAnim() {
         const normalizedRotation = 6.28 - (((this.rotation + Math.PI / 2) % (2 * Math.PI)) + (2 * Math.PI)) % (2 * Math.PI);
 
@@ -371,6 +438,11 @@ export class SpinnerWheel extends HTMLElement {
         this.lastPegDist = pegDist;
     }
 
+    /**
+     * Listens for mousedown events and updates the grab state.
+     *
+     * @param {MouseEvent} e event
+     */
     handleGrab(e) {
         if (e.button != 0) return;
         if (!this.canGrab) return;
@@ -391,6 +463,11 @@ export class SpinnerWheel extends HTMLElement {
         };
     }
 
+    /**
+     * Listens for mouseup events and updates the grab state.
+     *
+     * @param {MouseEvent} e event
+     */
     handleUnGrab(e) {
         if (e.button != 0) return;
         if (!this.canGrab) return;
@@ -405,6 +482,11 @@ export class SpinnerWheel extends HTMLElement {
         };
     }
 
+    /**
+     * Listens for mousemove events and updates the grab state.
+     *
+     * @param {MouseEvent} e event
+     */
     handleMouseMove(e) {
         if (!this.grabState.grabbed) return;
 
@@ -419,6 +501,11 @@ export class SpinnerWheel extends HTMLElement {
         };
     }
 
+    /**
+     * Updates whether the wheel is being controlled by the current user.
+     *
+     * @param {boolean} value Whether the user should be controlling the wheel.
+     */
     set controlling(value) {
         if (value) {
             this.canGrab = true;
@@ -433,6 +520,11 @@ export class SpinnerWheel extends HTMLElement {
 window.customElements.define('spinner-wheel', SpinnerWheel);
 
 export class SpinnerTicker extends HTMLElement {
+    /**
+     * Sets the rotation of the ticker.
+     *
+     * @param {number} rotation The new rotation of the spinner.
+     */
     set rotation(rotation) {
         this.style.transform = `rotateZ(${rotation}rad)`;
     }

@@ -5,14 +5,25 @@ const my_user_id    = document.body.dataset.userId;
 
 export class PlayerList extends HTMLElement {
     ul = null;
-    _players = new Set();
-    _playerElems = new Map();
+    #players = new Set();
+    #playerElems = new Map();
 
+    /**
+     * Called when the element connects to the document.
+     */
     connectedCallback() {
         this.ul = this.querySelector('ul');
     }
 
-    _createPlayerElem(display_name, user_id, controlling) {
+    /**
+     * Builds the LI element for the specified player.
+     *
+     * @param {string} display_name Display name of the player.
+     * @param {string} user_id id of the player.
+     * @param {boolean} controlling Whether the player is the controller.
+     * @returns {HTMLLIElement} The element built for the player.
+     */
+    #createPlayerElem(display_name, user_id, controlling) {
         const elem = document.createElement('li');
         elem.innerText = display_name;
         elem.setAttribute('data-user-id', user_id);
@@ -35,21 +46,41 @@ export class PlayerList extends HTMLElement {
         return elem;
     }
 
+    /**
+     * Adds a user to the player list.
+     *
+     * @param {object} player The player to add.
+     * @param {string} player.user_id The user id of the player.
+     * @param {string} player.display_name The display name of the player.
+     * @param {boolean} player.controlling Whether this player is the controller or not.
+     */
     add({ user_id, display_name, controlling }) {
-        if (this._players.has()) return;
-        const playerElem = this._createPlayerElem(display_name, user_id, controlling);
+        if (this.#players.has()) return;
+        const playerElem = this.#createPlayerElem(display_name, user_id, controlling);
         this.ul.append(playerElem);
-        this._playerElems.set(display_name, playerElem);
-        this._players.add(display_name);
+        this.#playerElems.set(display_name, playerElem);
+        this.#players.add(display_name);
     }
 
+    /**
+     * Removes a player with the specified display_name from the player list.
+     *
+     * @param {string} display_name The display name of the player to remove.
+     */
     remove(display_name) {
-        if (this._players.has(display_name)) return;
-        this._players.delete(display_name); 
-        this._playerElems.get(display_name).remove();
-        this._playerElems.delete(display_name);
+        if (this.#players.has(display_name)) return;
+        this.#players.delete(display_name); 
+        this.#playerElems.get(display_name).remove();
+        this.#playerElems.delete(display_name);
     }
 
+    /**
+     * Updates who is displayed as controller.
+     *
+     * @param {object} controller The new controller.
+     * @param {string} controller.controller_id The id of the controller.
+     * @param {string} controller.display_name The display name of the controller.
+     */
     setController({ controller_id, display_name }) {
         const controlling = this.ul.querySelector('li[controlling]');
         controlling?.removeAttribute('controlling');
@@ -70,10 +101,27 @@ export class PlayerList extends HTMLElement {
             });
     }
 
+    /**
+     * @typedef {object} Player
+     * @property {string} display_name The display name of the player.
+     * @property {string} user_id The id of the user.
+     * @property {boolean} controlling Whether the user is controlling the wheel.
+     */
+
+    /**
+     * Returns an array of the players in the list.
+     *
+     * @returns {Array<Player>} The players currently displayed by the list.
+     */
     get players() {
-        return [...this._players];
+        return [...this.#players];
     }
 
+    /**
+     * Sets the players currently displayed by the list.
+     *
+     * @param {Array<Player>} players The list of players to display.
+     */
     set players(players) {
         this._players.clear();
         this._playerElems.forEach((v) => (v.remove()));

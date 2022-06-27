@@ -17,6 +17,14 @@ function generateRoomSlug() {
     return (slug in rooms_by_slug)? generateRoomSlug() : slug;
 }
 
+/**
+ * @typedef {object} Player
+ * @property {string} user_id The id of the player.
+ * @property {string} display_name The display name of the player.
+ * @property {boolean} controlling Is this user the controller?
+ * @property {boolean} connected Is this user currently connected?
+ */
+
 class Room {
     id = ++id_counter;
     slug           = generateRoomSlug();
@@ -41,20 +49,41 @@ class Room {
         colors: ['#efefef', '#cfcfcf']
     };
 
+    /**
+     * Room Constructor
+     *
+     * @param {string} name The name of the room.
+     * @param {string} creator The user_id of the creator of the room.
+     */
     constructor(name, creator) {
         this.name = name;
         this.creator = creator;
     }
 
+    /**
+     * Returns the hashed password value to compare against.
+     *
+     * @returns {string|null} The hashed password for the room. 
+     */
     get password() {
         return this.password_hash;
     }
 
+    /**
+     * Sets the password of the room.
+     *
+     * @param {string} password The new password of the room in paintext.
+     */
     async set_password(password) {
         const password_hash = await bcrypt.hash(password, config.BCRYPT_SALT_ROUNDS);
         this.password_hash = password_hash;
     }
 
+    /**
+     * Get all of the players in the room.
+     *
+     * @returns {Array<Player>} All of the players in the room.
+     */
     get players() {
         return [...this.users.entries()]
             .map(([user_id, player_data]) => 
@@ -66,6 +95,11 @@ class Room {
                 }));
     }
 
+    /**
+     * Disconnect the specified user from the room.
+     *
+     * @param {string} user_id The id of the user to disconnect from the room.
+     */
     disconnect(user_id) {
         const user = {
             ...this.users.get(user_id),
@@ -75,6 +109,11 @@ class Room {
         this.users.set(user_id, user);
     }
 
+    /**
+     * Reconnect a user to the room.
+     *
+     * @param {string} user_id The id of the user to reconnect.
+     */
     reconnect(user_id) {
         const user = {
             ...this.users.get(user_id),
@@ -84,6 +123,15 @@ class Room {
         this.users.set(user_id, user);
     }
 
+    /**
+     * Attempt to join a user to this room.
+     *
+     * @param {object} user The user that is attempting to join.
+     * @param {string} user.user_id The id of the user connecting.
+     * @param {string} user.display_name The display name of the user connecting.
+     * @param {string} password The password this user attempted to connect with.
+     * @returns {Promise<boolean>} Whether the user successfully joined the room.
+     */
     async join({user_id, display_name}, password) {
         const authed = (!this.password_hash) 
             || (await bcrypt.compare(password || '', this.password_hash))

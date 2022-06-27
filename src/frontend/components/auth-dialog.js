@@ -6,6 +6,9 @@ export class AuthDialog extends HTMLElement {
     form     = null;
     errorMsg = null;
 
+    /**
+     * Called when the element connects to the document.
+     */
     connectedCallback() {
         this.dialog  = this.querySelector('dialog');
         this.form    = this.querySelector('form');
@@ -13,6 +16,12 @@ export class AuthDialog extends HTMLElement {
         dialogPolyfill.registerDialog(this.dialog);
     }
 
+    /**
+     * Makes the call to the api to authenticate the user. Calls the 
+     * callback when that completes.
+     *
+     * @param {Function} callback Called after authentication.
+     */
     onAuth(callback) {
         this.form.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -32,10 +41,18 @@ export class AuthDialog extends HTMLElement {
         });
     }
 
+    /**
+     * Shows the dialog.
+     */
     show() {
         this.dialog.show();
     }
 
+    /**
+     * Shows an error message.
+     *
+     * @param {string} msg The error message to show.
+     */
     _showError(msg) {
         this.errorMsg.innerText = msg;
         this.errorMsg.hidden = false;

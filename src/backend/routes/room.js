@@ -108,6 +108,14 @@ function handleRoomSocket(io) {
     };
 }
 
+/**
+ * Builds the room router.
+ *
+ * @param {Function} csrf CSRF middleware.
+ * @param {socketio.Server} io socket.io server
+ * @param {Function} sessionMiddleware session middleware.
+ * @returns {express.Router} The room router.
+ */
 export default (csrf, io, sessionMiddleware) => {
     const router = express.Router();
     router.post('/create', csrf, async (req, res) => {

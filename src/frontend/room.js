@@ -68,6 +68,11 @@ function connectToRoom() {
         });
     }
 
+    /**
+     * Set whether the user is controlling the spinner or not.
+     *
+     * @param {boolean} isControlling Whether the user is controlling the wheel.
+     */
     const setControlling = (isControlling) => {
         if (isControlling) {
             spinner.addEventListener('tick', onTick);
@@ -102,7 +107,8 @@ function connectToRoom() {
         roomTitle.title = title;
     });
 
-    socket.on('kick', (_kick_message) => {
+    // eslint-disable-next-line no-unused-vars
+    socket.on('kick', (kick_message) => {
         // TODO: Display kick message to user. 
     });
 

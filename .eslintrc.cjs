@@ -49,5 +49,18 @@ module.exports = {
         'sort-imports-es6-autofix/sort-imports-es6': 'warn',
         'jsdoc/require-description': 'warn',
         'jsdoc/check-syntax': 'warn',
+        'jsdoc/require-jsdoc': [
+            'warn',
+            {
+                'publicOnly': false,
+                'minLineCount': 10,
+                'require': {
+                    'FunctionExpression': true,
+                    'ArrowFunctionExpression': true,
+                    'FunctionDeclaration': true,
+                    'MethodDefinition': true
+                }
+            }
+        ]
     }
 };
