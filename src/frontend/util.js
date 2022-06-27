@@ -2,7 +2,7 @@
  * Internal function that creates an ImageBitmap from a File.
  *
  * @param {File} file The image to extract an ImageBitmap from.
- * @returns {ImageBitmap} ImageBitmap representation of the passed image.
+ * @returns {Promise<ImageBitmap>} ImageBitmap representation of the passed image.
  */
 function _getImageData(file) {
     return new Promise((resolve, reject) => {
@@ -22,12 +22,12 @@ function _getImageData(file) {
  *
  * @param {File} file to extract image data from.
  * @param {null|number} new_size The size to re-size the image to.
- * @returns {string} Base64 encoded string of the image.
+ * @returns {Promise<string>} Base64 encoded string of the image.
  */
 export async function getImageData(file, new_size = null) {
-    if (new_size === null) return _getImageData();
+    if (new_size === null) return await _getImageData();
 
-    const imgData = _getImageData(file);
+    const imgData = await _getImageData(file);
 
     const aspect = imgData.width / imgData.height;
     const imgWidth = (aspect > 1) ? new_size * aspect : new_size; 

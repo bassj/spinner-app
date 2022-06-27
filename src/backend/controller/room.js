@@ -117,7 +117,7 @@ class Room {
  * @param {string} root0.name The name of the room.
  * @param {string} root0.password The password of the room in plaintext.
  * @param {string|number} root0.creator The guid for the creator of the room.
- * @returns {Room} the room you've created.
+ * @returns {Promise<Room>} the room you've created.
  */
 export async function createRoom({ name, password, creator }) {
     const room = new Room(name, creator);
