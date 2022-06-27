@@ -123,9 +123,9 @@ export class PlayerList extends HTMLElement {
      * @param {Array<Player>} players The list of players to display.
      */
     set players(players) {
-        this._players.clear();
-        this._playerElems.forEach((v) => (v.remove()));
-        this._playerElems.clear();
+        this.#players.clear();
+        this.#playerElems.forEach((v) => (v.remove()));
+        this.#playerElems.clear();
 
         for (const pl of players) {
             if (!pl.connected) continue;
