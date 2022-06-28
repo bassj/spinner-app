@@ -1,191 +1,172 @@
-import bcrypt from 'bcrypt';
-import config from 'src/config.js';
-import words from 'random-words';
-
-let id_counter = 0;
-
-const rooms_by_id = {};
-const rooms_by_slug = {};
+import { 
+    createRoom, 
+    getRoom
+} from '@utils/room.js';
+import express from 'express';
+import socketio from 'socket.io';
 
 /**
- * Generates a random string of words for the room slug.
+ * Builds a handler for a connection the socket.io room.
  *
- * @returns {string} randomly generated room slug.
+ * @param {socketio.Server} io The current socketio instance.
+ * @returns {Function} The connection handler for the socket.io room.
  */
-function generateRoomSlug() {
-    const slug = words({min: 3, max: 4}).reduce((acc, word) => `${acc}${acc ? '-':''}${word}`, '');
-    return (slug in rooms_by_slug)? generateRoomSlug() : slug;
-}
+function handleSocket(io) {
+    return (sock) => {
+        // God, regex is such a cruel thing to bestow upon this world.
+        const roomName = sock.nsp.name.match(/(?<=room\/)([A-z]+-?)+/)[0]; 
+        const namespace = sock.nsp.name;
+        const room = getRoom(roomName);
+        const user_id = sock.request.session.user_id;
 
-/**
- * @typedef {object} Player
- * @property {string} user_id The id of the player.
- * @property {string} display_name The display name of the player.
- * @property {boolean} controlling Is this user the controller?
- * @property {boolean} connected Is this user currently connected?
- */
+        const broadcast = (evt, arg) => (io.of(namespace).in(room.slug).emit(evt, arg));
+        const setController = (controller_id) => {
+            const { display_name } = room.users.get(controller_id);
+            room.controller = controller_id;
+            broadcast('set_controller', { controller_id, display_name });
+        };
 
-class Room {
-    id = ++id_counter;
-    slug           = generateRoomSlug();
-    users          = new Map();
-    display_names  = new Set(); 
-    password_hash  = null;
-    creator        = null;
-    controller     = null;
-    name           = null;
-    images         = {};
-    settings       = {
-        sections: [
-            { size: 1, text: 'One' },
-            { size: 1, text: 'Two' },
-            { size: 1, text: 'Three' },
-            { size: 1, text: 'Four' },
-            { size: 1, text: 'Five' },
-            { size: 1, text: 'Six' },
-            { size: 1, text: 'Seven' },
-            { size: 1, text: 'Eight' },
-        ],
-        colors: ['#efefef', '#cfcfcf']
+        if (room == undefined) {
+            sock.emit('kick', { message: 'Room does not exist.' });
+            sock.disconnect();
+            return;
+        }
+
+        if (!(room.creator == user_id || room.users.has(user_id))) {
+            sock.emit('kick', { message: 'Not authenticated.' });
+            sock.disconnect();
+            return;
+        } else if (room.users.has(user_id)) {
+            room.reconnect(user_id);
+        }
+
+        sock.join(room.slug);
+        broadcast('players', room.players);
+
+        if (room.controller) {
+            const user = room.users.get(room.controller);
+            sock.emit('set_controller', { controller_id: room.controller, display_name: user.display_name });
+        }
+
+        if (room.creator == user_id) {
+            sock.on('room_settings', (settings) => {
+                room.settings = settings;
+                broadcast('room_settings', room.settings);
+            });
+
+            sock.on('room_title', (title) => {
+                room.name = title;
+                sock.in(room.slug).emit('room_title', title);
+            });
+        }
+
+        sock.on('set_controller', ({ controller_id }) => {
+            if (user_id == room.creator || user_id == room.controller) {
+                setController(controller_id);
+            }
+        });
+
+        sock.on('tick', (tickData) => {
+            if (room.controller == user_id) {
+                sock.in(room.slug).emit('tick', tickData);
+            }
+        });
+
+        sock.on('disconnecting', () => {
+            room.disconnect(user_id);
+            broadcast('players', room.players);
+        });
+
+        if (!room.controller && room.users.size == 1) {
+            setController(user_id);
+        }
+
+        sock.emit('room_settings', room.settings);
+        // sock.emit('room_images', room.images);
     };
-
-    /**
-     * Room Constructor
-     *
-     * @param {string} name The name of the room.
-     * @param {string} creator The user_id of the creator of the room.
-     */
-    constructor(name, creator) {
-        this.name = name;
-        this.creator = creator;
-    }
-
-    /**
-     * Returns the hashed password value to compare against.
-     *
-     * @returns {string|null} The hashed password for the room. 
-     */
-    get password() {
-        return this.password_hash;
-    }
-
-    /**
-     * Sets the password of the room.
-     *
-     * @param {string} password The new password of the room in paintext.
-     */
-    async set_password(password) {
-        const password_hash = await bcrypt.hash(password, config.BCRYPT_SALT_ROUNDS);
-        this.password_hash = password_hash;
-    }
-
-    /**
-     * Get all of the players in the room.
-     *
-     * @returns {Array<Player>} All of the players in the room.
-     */
-    get players() {
-        return [...this.users.entries()]
-            .map(([user_id, player_data]) => 
-                ({
-                    user_id,
-                    display_name: player_data.display_name,
-                    controlling: user_id == this.controller,
-                    connected: player_data.connected
-                }));
-    }
-
-    /**
-     * Disconnect the specified user from the room.
-     *
-     * @param {string} user_id The id of the user to disconnect from the room.
-     */
-    disconnect(user_id) {
-        const user = {
-            ...this.users.get(user_id),
-            connected: false
-        };
-
-        this.users.set(user_id, user);
-    }
-
-    /**
-     * Reconnect a user to the room.
-     *
-     * @param {string} user_id The id of the user to reconnect.
-     */
-    reconnect(user_id) {
-        const user = {
-            ...this.users.get(user_id),
-            connected: true
-        };
-
-        this.users.set(user_id, user);
-    }
-
-    /**
-     * Attempt to join a user to this room.
-     *
-     * @param {object} user The user that is attempting to join.
-     * @param {string} user.user_id The id of the user connecting.
-     * @param {string} user.display_name The display name of the user connecting.
-     * @param {string} password The password this user attempted to connect with.
-     * @returns {Promise<boolean>} Whether the user successfully joined the room.
-     */
-    async join({user_id, display_name}, password) {
-        const authed = (!this.password_hash) 
-            || (await bcrypt.compare(password || '', this.password_hash))
-            || user_id === this.creator;
-
-        if (!authed) {
-            throw {
-                message: 'Invalid Password',
-                type: 'invalid_password'
-            };
-        }
-
-        if (this.display_names.has(display_name)) {
-            throw {
-                message: 'Display Name taken.',
-                type: 'name_taken'
-            };
-        }
-
-        this.users.set(user_id, { display_name, connected: true });
-        this.display_names.add(display_name);
-
-        return authed;
-    }
 }
 
 /**
- * Creates a room.
+ * Creates a room then redirects to that rooms page.
  *
- * @param {object} root0 Options for the room to be created.
- * @param {string} root0.name The name of the room.
- * @param {string} root0.password The password of the room in plaintext.
- * @param {string|number} root0.creator The guid for the creator of the room.
- * @returns {Promise<Room>} the room you've created.
+ * @param {express.Request} req incoming request
+ * @param {express.Response} res outoing response
  */
-export async function createRoom({ name, password, creator }) {
-    const room = new Room(name, creator);
+async function _createRoom(req, res) {
+    const {spinner_name, room_password} = req.body;
 
-    if (password) {
-        await room.set_password(password);
+    if (!spinner_name) {
+        return res.status(400).send('Missing spinner_name'); 
     }
 
-    rooms_by_id[room.id] = room;
-    rooms_by_slug[room.slug] = room;
+    const room = await createRoom({
+        name: spinner_name,
+        password: room_password,
+        creator: req.session.user_id
+    });
 
-    return room;
+    res.redirect(`/room/${room.slug}`);
 }
 
 /**
- * Get the room with the given slug.
+ * Renders the page for the current room.
  *
- * @param {string} room_slug the slug of the room to retrieve.
- * @returns {Room} The room with the given slug.
+ * @param {express.Request} req incoming request
+ * @param {express.Response} res outoing response
  */
-export function getRoom(room_slug) {
-    return rooms_by_slug[room_slug];
+function _getRoom(req, res) {
+    const room = req.room;
+    const creator = room.creator === req.session.user_id;
+    const user_id = req.session.user_id;
+
+    res.render('spinner', {
+        csrfToken: req.csrfToken(),
+        creator,
+        room,
+        user_id,
+        reconnect: room.users.has(user_id)
+    });
 }
+
+/**
+ * Authenticate with the specified room.
+ *
+ * @param {express.Request} req incoming request
+ * @param {express.Response} res outoing response
+ */
+async function authRoom(req, res) {
+    const room = req.room;
+    const user_id = req.session.user_id;
+    const { room_password, display_name } = req.body;
+
+    if (!display_name) {
+        return res.status(400).send('Missing "display_name" parameter.');
+    }
+
+    if (!room_password && room.password != undefined && room.creator != user_id) {
+        return res.status(400).send('Missing "room_password" parameter.');
+    }
+
+    try {
+        await room.join({ user_id, display_name }, room_password);
+        req.session.display_name = display_name;
+        req.session.save();
+        return res.sendStatus(203);
+    } catch (e) {
+        if (e.type == 'invalid_password') {
+            return res.status(401).send(e.message);
+        } else if (e.type == 'name_taken') {
+            return res.status(400).send(e.message);
+        }
+    }
+
+    return res.sendStatus(203);
+}
+
+
+export default {
+    handleSocket,
+    createRoom: _createRoom,
+    authRoom,
+    getRoom: _getRoom
+};

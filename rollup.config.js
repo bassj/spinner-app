@@ -13,7 +13,8 @@ const production = process.env.ROLLUP_WATCH;
 const common_plugins = [
     alias({
         entries: [
-            { find: 'src', replacement: './src' }
+            { find: 'src', replacement: './src' },
+            { find: 'common', replacement: './src/common' }
         ]
     }),
     eslint(),
@@ -33,6 +34,11 @@ const frontend_plugins = [
 ];
 
 const backend_plugins = [
+    alias({
+        entries: [
+            { find: '@utils', replacement: './src/backend/utils' }
+        ]
+    }),
     ...common_plugins
 ];
 
@@ -64,7 +70,7 @@ export default [
         input: './src/backend/index.js',
         output: {
             file:  './dist/backend/index.js',
-            format: 'es',
+            format: 'cjs',
             sourcemap: !production
         },
         plugins: backend_plugins

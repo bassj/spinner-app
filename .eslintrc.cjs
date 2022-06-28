@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     'plugins': [ 
         'autofix',
         'jsdoc',
@@ -8,12 +8,14 @@ module.exports = {
     'env': {
         'browser': true,
         'es2021': true,
-        'node': true
+        'node': true,
+        'jest/globals': true,
     },
     'extends': [ 
         'eslint:recommended', 
         'plugin:jsdoc/recommended',
-        'plugin:import/recommended'
+        'plugin:import/recommended',
+        'plugin:jest/recommended',
     ],
     'parser': '@babel/eslint-parser',
     'parserOptions': {
