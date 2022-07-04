@@ -432,7 +432,7 @@ export class SpinnerWheel extends HTMLElement {
                 clone.play().then(() => clone.remove());
             }
 
-            this.#ticker.rotation = ((pegDist > 0)? 1 : -1) * fac * 0.3;
+            this.#ticker.rotation = ((pegDist > 0)? -1 : 1) * fac * 0.3;
         }
 
         this.lastPegDist = pegDist;
