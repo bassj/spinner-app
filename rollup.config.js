@@ -70,7 +70,7 @@ export default [
         input: './src/backend/index.js',
         output: {
             file:  './dist/backend/index.js',
-            format: 'cjs',
+            format: 'es',
             sourcemap: !production
         },
         plugins: backend_plugins

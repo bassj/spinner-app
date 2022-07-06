@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "src/backend/index.js",
-  "type":"module",
+  "type": "module",
   "scripts": {
     "lint": "npx eslint src/**/*.js",
     "dev": "npx rollup -cw & nodemon dist/backend/index.js && fg",
@@ -45,6 +45,7 @@
     "eslint-plugin-jest": "^26.5.3",
     "eslint-plugin-jsdoc": "^39.3.3",
     "eslint-plugin-sort-imports-es6-autofix": "^0.6.0",
+    "jest": "^28.1.1",
     "rollup": "^2.70.2",
     "rollup-jest": "^3.0.0",
     "rollup-plugin-scss": "^3.0.0",
