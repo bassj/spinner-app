@@ -1,3 +1,5 @@
+/** @module frontend/components/room-title */
+
 import '../styles/room-title-styles.scss';
 
 class RoomTitle extends HTMLElement {
@@ -9,6 +11,7 @@ class RoomTitle extends HTMLElement {
      */
     connectedCallback() { 
         this.#editBtn.addEventListener('click', () => this.#editTitle());
+        this.#header.addEventListener('click', () => this.#editTitle());
         this.#header.addEventListener('blur', () => this.#cancelEdit());
         this.#header.addEventListener('keydown', (e) => (e.key == 'Enter') && this.#cancelEdit());
         this.#header.addEventListener('input', () => this.#updateWindowTitle());

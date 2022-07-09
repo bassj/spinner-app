@@ -1,4 +1,4 @@
-//** @module frontend/components/spinner *//
+/** @module frontend/components/spinner */
 
 import {
     getImage
@@ -12,7 +12,7 @@ export class SpinnerWheel extends HTMLElement {
     pegs = [];
     secImages = [];
 
-    settings = {
+    #settings = {
         sections: [
             { size: 1, text: 'One',   image: undefined },
             { size: 1, text: 'Two',   image: undefined },
@@ -75,7 +75,7 @@ export class SpinnerWheel extends HTMLElement {
         addEventListener('add_image', (e) => {
             const hash = e.detail.hash;
             
-            for (const section of this.settings.sections) {
+            for (const section of this.#settings.sections) {
                 if (section.image === hash) {
                     this.#imageContainer.innerHTML = '';
                     this.#buildImages();
@@ -97,19 +97,13 @@ export class SpinnerWheel extends HTMLElement {
     }
 
     /**
-     * An object representing the settings of a section of the wheel.
+     * Sets the settings of the spinner
      *
-     * @typedef {object} Section
-     * @property {string} text The text on the section.
-     * @property {number} size Relative size of the section.
+     * @param {object} value The new settings for the spinner.
      */
-    /**
-     * Sets the sections of the wheel.
-     *
-     * @param {Array<Section>} sections The settings for each section of the wheel.
-     */
-    setSections(sections) {
-        this.settings.sections = sections;
+    set settings(value) {
+        this.#settings = value;
+
         this.#sectionContainer.innerHTML = '';
         this.#imageContainer.innerHTML = '';
 
@@ -118,19 +112,12 @@ export class SpinnerWheel extends HTMLElement {
     }
 
     /**
-     * An object representing the color settings of a wheel.
+     * Gets the settings this spinner is currently using
      *
-     * @typedef {Array<string>} Colors
+     * @returns {object} The settings of this spinner.
      */
-    /**
-     * Set the colors of the wheel.
-     *
-     * @param {Colors} colors The new color settings of th wheel.
-     */
-    setColors(colors) {
-        this.settings.colors = colors;
-        this.#sectionContainer.innerHTML = '';
-        this.#buildSections();
+    get settings() {
+        return this.#settings;
     }
 
     /**
@@ -202,7 +189,7 @@ export class SpinnerWheel extends HTMLElement {
      * Builds the sections of the spinner.
      */
     #buildSections() {
-        const totalFrUnits = this.settings.sections.reduce((acc, val) => (acc + parseInt(val.size)), 0);
+        const totalFrUnits = this.#settings.sections.reduce((acc, val) => (acc + parseInt(val.size)), 0);
         const radius = 32;
 
         let prevEndAngle = 0;
@@ -214,13 +201,13 @@ export class SpinnerWheel extends HTMLElement {
             this.#svgDefs.removeChild(path);
         }
 
-        for (const [index, section] of this.settings.sections.entries()) {
+        for (const [index, section] of this.#settings.sections.entries()) {
             const sectionAngle = (parseFloat(section.size) / totalFrUnits) * 2 * Math.PI;
             const startAngle = prevEndAngle;
             const endAngle = startAngle + sectionAngle;
             prevEndAngle = endAngle;
 
-            const bgColor = this.settings.colors[index % this.settings.colors.length];
+            const bgColor = this.#settings.colors[index % this.#settings.colors.length];
 
             const startPos = `${Math.cos(startAngle) * radius} ${Math.sin(startAngle) * radius}`;
             const endPos   = `${Math.cos(endAngle) * radius} ${Math.sin(endAngle) * radius}`;
@@ -299,12 +286,12 @@ export class SpinnerWheel extends HTMLElement {
      * Builds the images of the spinner.
      */
     #buildImages() {
-        const totalFrUnits = this.settings.sections.reduce((acc, val) => (acc + parseInt(val.size)), 0);
+        const totalFrUnits = this.#settings.sections.reduce((acc, val) => (acc + parseInt(val.size)), 0);
 
         let images       = [];
         let prevEndAngle = 0;
 
-        for (const section of this.settings.sections) {
+        for (const section of this.#settings.sections) {
             const startAngle   = prevEndAngle;
             const sectionAngle = (parseFloat(section.size) / totalFrUnits) * 2 * Math.PI;
             const endAngle     = startAngle + sectionAngle;

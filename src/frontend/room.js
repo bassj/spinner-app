@@ -1,4 +1,4 @@
-//** @module frontend/room */
+/** @module frontend/room */
 
 import './styles/spinner-styles.scss';
 import './styles/theme-styles.scss';
@@ -86,11 +86,7 @@ function connectToRoom() {
         socket.emit('set_controller', { controller_id: e.detail.user_id });
     });
 
-    socket.on('room_settings', (settings) => {
-        
-        spinner.setSections(settings.sections);
-        spinner.setColors(settings.colors);
-    });
+    socket.on('room_settings', (settings) => spinner.settings = settings);
 
     socket.on('add_image',    ({ hash, image }) => saveImage(hash, image));
     socket.on('delete_image', ({ hash })        => deleteImage(hash));

@@ -1,4 +1,4 @@
-//** @module frontend/components/settings-menu */
+/** @module frontend/components/settings-menu */
 import '../styles/settings-menu-styles.scss';
 import playerList from './player-list.js';
 import spinner from './spinner.js';
