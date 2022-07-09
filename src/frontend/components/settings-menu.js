@@ -57,7 +57,6 @@ class SectionSettings extends HTMLElement {
     /**
      * Builds the settings form for a specific section.
      *
-     * @param {number} index The index of the section that's being built.
      * @param {spinner.Section} section The settings of this section of the spinner.
      * @returns {HTMLLIElement} The new settings form for the specified section.
      */

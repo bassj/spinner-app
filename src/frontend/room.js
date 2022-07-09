@@ -87,7 +87,7 @@ function connectToRoom() {
     });
 
     socket.on('room_settings', (settings) => {
-        console.log(settings);
+        
         spinner.setSections(settings.sections);
         spinner.setColors(settings.colors);
     });

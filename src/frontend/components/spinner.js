@@ -1,3 +1,5 @@
+//** @module frontend/components/spinner *//
+
 import {
     getImage
 } from '../util';
@@ -323,6 +325,14 @@ export class SpinnerWheel extends HTMLElement {
         this.secImages = images;
     }
 
+    /**
+     * Builds a section image.
+     *
+     * @param {spinner.Section} section The section data.
+     * @param {number} startAngle The start angle of this section.
+     * @param {number} endAngle The end angle of this section
+     * @returns {HTMLElement} the section image element
+     */
     #buildSectionImage(section, startAngle, endAngle) {
         const radius = 32; 
         const image = getImage(section.image);

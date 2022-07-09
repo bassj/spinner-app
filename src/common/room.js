@@ -76,6 +76,7 @@ export class Room {
 
     /**
      * Sets the password of the room.
+     *
      * @memberof Room
      * @param {string} password The new password of the room in paintext.
      */
