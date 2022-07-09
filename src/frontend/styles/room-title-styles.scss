@@ -7,6 +7,9 @@ room-title {
     h2 {
         margin: 0px;
         padding: 2px;
+        cursor: text;
+
+        user-select: unset;
     }
 
     button {

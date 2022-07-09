@@ -21,6 +21,9 @@ class RoomTitle extends HTMLElement {
      * Makes the title editable.
      */
     #editTitle() {
+        if (document.activeElement === this.#header)
+            return;
+
         this.#header.setAttribute('tabindex', '0');
         this.#header.setAttribute('contenteditable', 'true');
         this.#header.setAttribute('role', 'textbox');
