@@ -47,10 +47,10 @@
                         <h3 id="spinner-settings-title"> Spinner Settings </h3>
                         <form aria-labeledby="spinner-settings-title">
                             <color-settings>
-                                <h4 class="color-header"> 
-                                    Colors
+                                <div class="color-header">
+                                    <h4> Colors </h4>
                                     <button type="button" title="Delete colors" class="delete-color-btn"></button>
-                                </h4>
+                                </div>
                                 <div class="section-colors">
                                     <ul class="section-colors">
                                     </ul>
@@ -58,7 +58,10 @@
                                 </div>
                             </color-settings>
                             <section-settings>
-                                <h4> Sections </h4>
+                                <div> 
+                                    <h4> Sections </h4>
+                                    <button type="button" class="add-section-btn"></button>
+                                </div>
                                 <ul>
                                     <template id="section-editor">
                                         <li>
@@ -67,7 +70,6 @@
                                             <label class="set-image">
                                                 <input type="file" accept="image/*" />
                                             </label>
-                                            <button type="button" title="Clone Section" class="clone-btn"></button>
                                             <button type="button" title="Delete Section" class="delete-btn"></button>
                                         </li>
                                     </template>

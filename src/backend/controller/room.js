@@ -58,6 +58,16 @@ function handleSocket(io) {
                 room.name = title;
                 sock.in(room.slug).emit('room_title', title);
             });
+
+            sock.on('add_image', ({ hash, image }) => {
+                room.addImage(hash, image);
+                sock.in(room.slug).emit('add_image', { hash, image });
+            });
+
+            sock.on('delete_image', ({ hash }) => {
+                room.deleteImage(hash);
+                sock.in(room.slug).emit('delete_image', { hash });
+            });
         }
 
         sock.on('set_controller', ({ controller_id }) => {
@@ -82,7 +92,7 @@ function handleSocket(io) {
         }
 
         sock.emit('room_settings', room.settings);
-        // sock.emit('room_images', room.images);
+        sock.emit('room_images', room.images);
     };
 }
 

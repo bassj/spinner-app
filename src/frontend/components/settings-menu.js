@@ -1,13 +1,23 @@
+//** @module frontend/components/settings-menu */
 import '../styles/settings-menu-styles.scss';
 import playerList from './player-list.js';
 import spinner from './spinner.js';
 
-import { getImageData, toggleButton } from '../util';
+import { getImageData, saveImage, toggleButton } from '../util';
 
 class SectionSettings extends HTMLElement {
-    _images = [];
-    _ul = this.querySelector('ul');
-    _template = this._ul.querySelector('template');
+    #ul = this.querySelector('ul');
+    #template = this.#ul.querySelector('template');
+    #addSectionBtn = this.querySelector('button.add-section-btn');
+
+    connectedCallback() {
+        this.#addSectionBtn.addEventListener('click', () => {
+            const newForm = this.#buildSettingForm({ text: '', size: 1 });
+            this.#ul.append(newForm);
+            newForm.scrollIntoView();
+            this.dispatchEvent(new CustomEvent('add-section', { bubbles: true }));
+        });
+    }
 
     /**
      * Sets the value of the section settings form.
@@ -15,35 +25,10 @@ class SectionSettings extends HTMLElement {
      * @param {Array<spinner.Section>} val The new value of the section settings form.
      */
     set value(val) {
-        this._ul.innerHTML = '';
-        this._ul.append(
-            ...val.map((e, index) => this.#buildSettingForm(index, e))
+        this.#ul.innerHTML = '';
+        this.#ul.append(
+            ...val.map((e) => this.#buildSettingForm(e))
         );
-    }
-
-    /**
-     * Gets the images for each section.
-     * 
-     * @deprecated
-     * @returns {Promise<Array<string>>} An array of the base64 image urls.
-     */
-    async getImages() {
-        let images = this.#getSavedImages();
-        const lis = Array.from(this._ul.querySelectorAll('li'));
-
-        for (const [index, li] of lis.entries()) {
-            const imgField = li.querySelector('[type="file"]');
-            const image = imgField.files[0];
-
-            if (image && imgField.dataset.dirty == 'true') {
-                imgField.dataset.dirty = 'false';
-                images[index] = await getImageData(image, 200);
-            }
-        }
-
-        this.#saveImages(images);
-
-        return images;
     }
 
     /**
@@ -54,13 +39,13 @@ class SectionSettings extends HTMLElement {
     get value() {
         let values = [];
 
-        const lis = Array.from(this._ul.querySelectorAll('li'));
+        const lis = Array.from(this.#ul.querySelectorAll('li'));
 
         for (const li of lis) {
             const section = { 
                 size: li.querySelector('[type="number"]').value, 
                 text: li.querySelector('[type="text"]').value,
-                image: null
+                image: li.querySelector('[type="file"]').dataset.value
             };
 
             values.push(section);
@@ -70,89 +55,15 @@ class SectionSettings extends HTMLElement {
     }
 
     /**
-     * Save the images
-     *
-     * @deprecated
-     * @param {object} images the images
-     */
-    #saveImages(images) {
-        this._images = images;
-    }
-
-    /**
-     * Get the saved images
-     *
-     * @deprecated
-     * @returns {object} images
-     */
-    #getSavedImages() { 
-        return this._images;
-    }
-
-    /**
-     * Deletes the image at the specified index.
-     *
-     * @deprecated
-     * @param {number} index the index of the image to delete.
-     */
-    _deleteImage(index) {
-        if (!window.sessionStorage.getItem('images')) return;
-        const images = JSON.parse(window.sessionStorage.getItem('images'));
-
-        delete images[index];
-
-        for (const [image_index, element] of Object.entries(images)) {
-            if (image_index <= index) continue;
-            images[image_index - 1] = element;
-            delete images[image_index];
-        }
-
-        window.sessionStorage.setItem('images', JSON.stringify(images));
-
-        this.#updateLiIndices();
-    }
-
-    /**
-     * Clone an image at the specified index.
-     *
-     * @deprecated
-     * @param {number} index The index of the image to clone.
-     */
-    _cloneImage(index) {
-        if (!window.sessionStorage.getItem('images')) return;
-        const images = JSON.parse(window.sessionStorage.getItem('images'));
-
-        const new_index = Object.entries(images).length;
-
-        images[new_index] = images[index];
-
-        window.sessionStorage.setItem('images', JSON.stringify(images));
-
-        this.#updateLiIndices();
-    }
-
-    /**
-     * Update the "data-index" attribute of the `li` elements for each section.
-     */
-    #updateLiIndices() {
-        const lis = Array.from(this._ul.querySelectorAll('li'));
-
-        for (const [index, li] of Object.entries(lis)) {
-            li.dataset.index = index;
-        }
-    }
-
-    /**
      * Builds the settings form for a specific section.
      *
      * @param {number} index The index of the section that's being built.
      * @param {spinner.Section} section The settings of this section of the spinner.
      * @returns {HTMLLIElement} The new settings form for the specified section.
      */
-    #buildSettingForm(index, { size, text }) {
-        const tpl = this._template.content.cloneNode(true);
+    #buildSettingForm({ size, text, image }) {
+        const tpl = this.#template.content.cloneNode(true);
         const li = tpl.querySelector('li');
-        li.dataset.index = index;
 
         const textInput = li.querySelector('input[type="text"]');
         textInput.value = text;
@@ -161,44 +72,38 @@ class SectionSettings extends HTMLElement {
         sizePicker.value = size;
 
         const fileInput = li.querySelector('input[type="file"]');
-        fileInput.addEventListener('input', () => {
-            fileInput.dataset.dirty = 'true';
+        fileInput.addEventListener('input', async (e) => {
+            e.preventDefault(); // Pause propagation of event
+            e.stopPropagation();
+
+            const [file] = fileInput.files;
+            const [resized_image, hash] = await getImageData(file, 200);
+            fileInput.setAttribute('data-value', hash);
+
+            saveImage(hash, resized_image);
+            this.dispatchEvent(e); // Resume propagation of event.
         });
 
-        const settingsForm = this;
+        if (image)
+            fileInput.setAttribute('data-value', image);
 
         /**
          * Event handler for when the section is deleted.
          *
          * @param {CustomEvent} e event.
          */
-        const onDelete = function (e) {
+        const onDelete = (e) => {
             if (e.buttons) return;
-            this.remove();
-            settingsForm._deleteImage(index);
-            settingsForm.dispatchEvent(new CustomEvent('delete', { bubbles: true, detail: index }));
-        };
-
-        /**
-         * Event handler for when the section is cloned.
-         *
-         * @param {CustomEvent} e event.
-         */
-        const onClone = function (e) {
-            if (e.buttons) return;
-            const clone = this.cloneNode(true);
-            clone.querySelector('button.clone-btn').addEventListener('click', onClone.bind(clone));
-            clone.querySelector('button.delete-btn').addEventListener('click', onDelete.bind(clone));
-            settingsForm._cloneImage(index);
-            settingsForm._ul.append(clone);
-            settingsForm.dispatchEvent(new CustomEvent('clone', { bubbles: true }));
+            li.remove();
+            this.dispatchEvent(
+                new CustomEvent('delete', { 
+                    bubbles: true, 
+                })
+            );
         };
 
         const deleteBtn = li.querySelector('button.delete-btn');
         deleteBtn.addEventListener('click', onDelete.bind(li)); 
-
-        const cloneBtn = li.querySelector('button.clone-btn');
-        cloneBtn.addEventListener('click', onClone.bind(li));
 
         return li;
     }
@@ -363,21 +268,11 @@ class SettingsMenu extends HTMLElement {
      *
      * @returns {SpinnerSettings} Current value of the settings menu.
      */
-    getSettings() {
+    get settings() {
         return {
             colors:   this.#colorSettings.value,
             sections: this.#sectionSettings.value
         };
-    }
-
-    /**
-     * Get the current images from the settings menu.
-     *
-     * @deprecated
-     * @returns {object} images.
-     */
-    async getImages() {
-        return await this.#sectionSettings.getImages();
     }
 }
 

@@ -1,0 +1,12 @@
+{
+    "opts": {
+        "recurse": true,
+        "private": true,
+        "destination": "./docs",
+        "template": "node_modules/clean-jsdoc-theme"
+    },
+    "source": {
+        "include": ["src/frontend", "src/common", "src/backend"],
+        "includePattern": ".+\\.js(doc)?$"
+    }
+}

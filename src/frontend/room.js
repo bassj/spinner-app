@@ -1,7 +1,14 @@
+//** @module frontend/room */
+
 import './styles/spinner-styles.scss';
 import './styles/theme-styles.scss';
 
 import { io } from 'socket.io-client';
+
+import {
+    deleteImage,
+    saveImage
+} from './util';
 
 import authDialog from './components/auth-dialog'; 
 import playerList from './components/player-list';
@@ -23,49 +30,34 @@ if (document.body.dataset.reconnect == 'true') {
  */
 function connectToRoom() {
     const user_id = document.body.dataset.userId;
-    const socket = io(window.location.pathname);
+    const socket  = io(window.location.pathname);
 
     const onTick = () => {
         socket.emit('tick', {
             angularVelocity: spinner.angularVelocity,
-            rotation: spinner.rotation
+            rotation:        spinner.rotation
         });
     };
 
     const onServerTick = ({ rotation, angularVelocity }) => {
-        spinner.rotation = rotation;
+        spinner.rotation        = rotation;
         spinner.angularVelocity = angularVelocity;
     };
 
     if (isCreator) {
-        settingsMenu.addEventListener('input', async () => {
-            socket.emit('room_settings', settingsMenu.getSettings());
-            const roomImages = await settingsMenu.getImages();
+        const emitSettings = () => socket.emit('room_settings', settingsMenu.settings);
+        settingsMenu.addEventListener('input',  emitSettings);
+        settingsMenu.addEventListener('delete', emitSettings);
+        settingsMenu.addEventListener('add-section',  emitSettings);
+        
+        addEventListener('add_image', (e) => 
+            socket.emit('add_image', e.detail));
 
-            if (Object.keys(roomImages).length) {
-                socket.emit('room_images', roomImages);
-            }
-        });
-
-        settingsMenu.addEventListener('delete', async () => {
-            socket.emit('room_settings', settingsMenu.getSettings());
-            const roomImages = await settingsMenu.getImages();
-            if (Object.keys(roomImages).length) {
-                socket.emit('room_images', roomImages);
-            }
-        });
-
-        settingsMenu.addEventListener('clone', async () => {
-            socket.emit('room_settings', settingsMenu.getSettings());
-            const roomImages = await settingsMenu.getImages();
-            if (Object.keys(roomImages).length) {
-                socket.emit('room_images', roomImages);
-            }
-        });
-
-        roomTitle.addEventListener('input', () => {
-            socket.emit('room_title', roomTitle.title);
-        });
+        addEventListener('delete_image', (e) => 
+            socket.emit('delete_image', e.detail));
+        
+        roomTitle.addEventListener('input', () =>
+            socket.emit('room_title', roomTitle.title));
     }
 
     /**
@@ -95,12 +87,18 @@ function connectToRoom() {
     });
 
     socket.on('room_settings', (settings) => {
+        console.log(settings);
         spinner.setSections(settings.sections);
         spinner.setColors(settings.colors);
     });
 
+    socket.on('add_image',    ({ hash, image }) => saveImage(hash, image));
+    socket.on('delete_image', ({ hash })        => deleteImage(hash));
+
     socket.on('room_images', (images) => {
-        spinner.setImages(images);
+        for (const { hash, image } of images) {
+            saveImage(hash, image);
+        }
     });
 
     socket.on('room_title', (title) => {

@@ -1,3 +1,7 @@
+import {
+    getImage
+} from '../util';
+
 const lightGray = '#efefef';
 const darkGray  = '#cfcfcf';
 
@@ -8,14 +12,14 @@ export class SpinnerWheel extends HTMLElement {
 
     settings = {
         sections: [
-            { size: 1, text: 'One' },
-            { size: 1, text: 'Two' },
-            { size: 1, text: 'Three' },
-            { size: 1, text: 'Four' },
-            { size: 1, text: 'Five' },
-            { size: 1, text: 'Six' },
-            { size: 1, text: 'Seven' },
-            { size: 1, text: 'Eight' },
+            { size: 1, text: 'One',   image: undefined },
+            { size: 1, text: 'Two',   image: undefined },
+            { size: 1, text: 'Three', image: undefined },
+            { size: 1, text: 'Four',  image: undefined },
+            { size: 1, text: 'Five',  image: undefined },
+            { size: 1, text: 'Six',   image: undefined },
+            { size: 1, text: 'Seven', image: undefined },
+            { size: 1, text: 'Eight', image: undefined },
         ],
         colors: [lightGray, darkGray]
     };
@@ -66,6 +70,18 @@ export class SpinnerWheel extends HTMLElement {
         this.#buildSections();
         this.#buildImages();
 
+        addEventListener('add_image', (e) => {
+            const hash = e.detail.hash;
+            
+            for (const section of this.settings.sections) {
+                if (section.image === hash) {
+                    this.#imageContainer.innerHTML = '';
+                    this.#buildImages();
+                    break;
+                }
+            }
+        });
+
         this.addEventListener('mousedown', (e) => this.handleGrab(e));
         addEventListener('mousemove', (e) => this.handleMouseMove(e));
         addEventListener('mouseup', (e) => this.handleUnGrab(e));
@@ -76,17 +92,6 @@ export class SpinnerWheel extends HTMLElement {
         setInterval(() => {
             this.doPhys();
         }, 1000.0 / 20.0);
-    }
-
-    /**
-     * Set the images of the spinner.
-     *
-     * @param {Array<string>} images an array of base64 images to use for the spinner.
-     */
-    setImages(images) {
-        this.images = images;
-        this.#imageContainer.innerHTML = '';
-        this.#buildImages();
     }
 
     /**
@@ -104,7 +109,10 @@ export class SpinnerWheel extends HTMLElement {
     setSections(sections) {
         this.settings.sections = sections;
         this.#sectionContainer.innerHTML = '';
+        this.#imageContainer.innerHTML = '';
+
         this.#buildSections();
+        this.#buildImages();
     }
 
     /**
@@ -290,39 +298,47 @@ export class SpinnerWheel extends HTMLElement {
      */
     #buildImages() {
         const totalFrUnits = this.settings.sections.reduce((acc, val) => (acc + parseInt(val.size)), 0);
-        const radius = 32;
 
-        let images = [];
-
+        let images       = [];
         let prevEndAngle = 0;
 
-        for (const [index, section] of this.settings.sections.entries()) {
-            if (!(index in this.images)) continue;
-
-            const image = this.images[index];
-
+        for (const section of this.settings.sections) {
+            const startAngle   = prevEndAngle;
             const sectionAngle = (parseFloat(section.size) / totalFrUnits) * 2 * Math.PI;
-            const startAngle = prevEndAngle;
-            const endAngle = startAngle + sectionAngle;
-            prevEndAngle = endAngle;
+            const endAngle     = startAngle + sectionAngle;
+            prevEndAngle       = endAngle;
 
-            const imageAngle = startAngle + (endAngle - startAngle) / 2;
-            const imageX = Math.cos(imageAngle) * (radius / 2);
-            const imageY = Math.sin(imageAngle) * (radius / 2);
-            const imageRot = imageAngle * (180 / Math.PI);
+            if (!section.image) continue;
 
-            const sectionImage = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-            sectionImage.setAttribute('width', this.imageSize);
-            sectionImage.setAttribute('height', this.imageSize);
-            sectionImage.setAttribute('transform', `translate(${imageX} ${imageY}) rotate(${imageRot + 90}) translate(${-this.imageSize / 2} ${-this.imageSize / 2})`);
-            sectionImage.setAttribute('href', image); 
-            sectionImage.setAttributeNS(null, 'clip-path', 'url(#circle-clip)');
+            const sectionImage = this.#buildSectionImage(
+                section, 
+                startAngle, 
+                endAngle
+            );
 
             images.push(sectionImage);
             this.#imageContainer.append(sectionImage);
         }
 
         this.secImages = images;
+    }
+
+    #buildSectionImage(section, startAngle, endAngle) {
+        const radius = 32; 
+        const image = getImage(section.image);
+        const imageAngle = startAngle + (endAngle - startAngle) / 2;
+        const imageX = Math.cos(imageAngle) * (radius / 2);
+        const imageY = Math.sin(imageAngle) * (radius / 2);
+        const imageRot = imageAngle * (180 / Math.PI);
+
+        const sectionImage = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+        sectionImage.setAttribute('width', this.imageSize);
+        sectionImage.setAttribute('height', this.imageSize);
+        sectionImage.setAttribute('transform', `translate(${imageX} ${imageY}) rotate(${imageRot + 90}) translate(${-this.imageSize / 2} ${-this.imageSize / 2})`);
+        sectionImage.setAttribute('href', image); 
+        sectionImage.setAttributeNS(null, 'clip-path', 'url(#circle-clip)');
+
+        return sectionImage;
     }
 
     /**

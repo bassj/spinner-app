@@ -1,3 +1,7 @@
+/** 
+ * @module common/room
+ */
+
 import bcrypt from 'bcrypt';
 import config from 'src/config.js';
 import words from 'random-words';
@@ -34,7 +38,6 @@ export class Room {
     creator        = null;
     controller     = null;
     name           = null;
-    images         = {};
     settings       = {
         sections: [
             { size: 1, text: 'One' },
@@ -48,6 +51,8 @@ export class Room {
         ],
         colors: ['#efefef', '#cfcfcf']
     };
+
+    #images = {};
 
     /**
      * Room Constructor
@@ -71,7 +76,7 @@ export class Room {
 
     /**
      * Sets the password of the room.
-     *
+     * @memberof Room
      * @param {string} password The new password of the room in paintext.
      */
     async set_password(password) {
@@ -82,14 +87,35 @@ export class Room {
     /**
      * Check whether the given password is correct.
      *
-     * @param {string} The plaintext passord to check.
+     * @param {string} password The plaintext passord to check.
      * @returns {Promise<boolean>} Whether the passed password matches the hash.
      */
     check_password(password) {
         return bcrypt.compare(password, this.password_hash);
     }
 
+    /**
+     * Add an image to our cache of images.
+     *
+     * @param {string} hash hash of the image to add.
+     * @param {string} image Base64 encoded image string.
+     */
+    addImage(hash, image) {
+        this.#images[hash] = image;
+    }
 
+    /**
+     * Deletes an image from our cache of images.
+     *
+     * @param {string} hash The hash of the image to delete.
+     */
+    deleteImage(hash) { 
+        delete this.#images[hash];
+    }
+
+    get images() {
+        return Object.entries(this.#images).map(([hash, image]) => ({ hash, image }));
+    }
 
     /**
      * Get all of the players in the room.

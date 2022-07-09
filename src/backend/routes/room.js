@@ -1,7 +1,7 @@
 import {getRoom} from '@utils/room.js';
+import controller from '../controller/room';
 import express from 'express';
 import socketio from 'socket.io';
-import controller from '../controller/room';
 
 /**
  * Builds an express middleware function that attaches a users current room to the
