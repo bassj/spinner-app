@@ -7,7 +7,6 @@
   "scripts": {
     "lint": "npx eslint src/**/*.js",
     "dev": "npx rollup -cw & nodemon dist/backend/index.js && fg",
-    "preinstall": "npx npm-force-resolutions",
     "test": "jest",
     "docs": "rm -rf ./docs && jsdoc -c ./jsdoc.config.json -P ./package.json"
   },
@@ -54,8 +53,5 @@
     "rollup-plugin-scss": "^3.0.0",
     "rollup-plugin-terser": "^7.0.2",
     "sass": "^1.50.1"
-  },
-  "resolutions": {
-    "async": "^3.2.3"
   }
 }
