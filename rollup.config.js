@@ -14,7 +14,8 @@ const common_plugins = [
     alias({
         entries: [
             { find: 'src', replacement: './src' },
-            { find: 'common', replacement: './src/common' }
+            { find: 'common', replacement: './src/common' },
+            { find: 'config', replacement: './src/config.js' },
         ]
     }),
     eslint(),
@@ -36,7 +37,8 @@ const frontend_plugins = [
 const backend_plugins = [
     alias({
         entries: [
-            { find: '@utils', replacement: './src/backend/utils' }
+            { find: '@utils', replacement: './src/backend/utils' },
+            { find: 'logger', replacement: './src/backend/logger.js' },
         ]
     }),
     ...common_plugins

@@ -5,14 +5,21 @@ import crypto from 'crypto';
 import csurf from 'csurf';
 import express from 'express';
 import http from 'http';
+import logger from 'logger';
 import multer from 'multer';
 import session from 'express-session';
+import sessionMemoryStore from 'memorystore';
 
 import roomRouter from './routes/room.js';
+
+const MemoryStore = sessionMemoryStore(session);
 
 const sessionMiddleware = session({
     secret: config.SECRET,
     cookie: { secure: !config.DEBUG },
+    store: new MemoryStore({
+        checkPeriod: 86400000 // prune expired entries every 24h
+    }),
     saveUninitialized: false,
     resave: false,
 });
@@ -55,5 +62,5 @@ app.get('/', csrf, (req, res) => {
 });
 
 http_server.listen(config.PORT, () => {
-    // TODO: add some logging that we're listening.
+    logger.info('Listening on ' + config.PORT);
 });
