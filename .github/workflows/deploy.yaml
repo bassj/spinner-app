@@ -1,0 +1,26 @@
+name: Deploy
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Digital Ocean
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          username: ${{ secrets.CICD_USER }}
+          script: |
+              cd /var/www/spinner-app
+              echo "Updating source..."
+              git pull && echo "Done."
+              echo "Installing dependencies..."
+              npm ci && echo "Done."
+              echo "Running project build command..."
+              npm run build && echo "Done."
+              echo "Restarting spinner-app service"
+              sudo /usr/bin/systemctl restart spinner-app.service 
+              echo "Done."
