@@ -1,6 +1,6 @@
 import winston from 'winston';
 
-const debug = process.env.NODE_ENV === 'production';
+const debug = process.env.NODE_ENV !== 'production';
 
 const logger = winston.createLogger({
     level: 'info',
