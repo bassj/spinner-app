@@ -3,6 +3,7 @@ import {
     getRoom
 } from '@utils/room.js';
 import express from 'express';
+import logger from 'logger';
 import socketio from 'socket.io';
 
 /**
@@ -109,10 +110,14 @@ async function _createRoom(req, res) {
         return res.status(400).send('Missing spinner_name'); 
     }
 
+    const creator = req.session.user_id;
+    
+    logger.info(`${ creator } is creating room: "${ spinner_name }"`);
+
     const room = await createRoom({
         name: spinner_name,
         password: room_password,
-        creator: req.session.user_id
+        creator
     });
 
     res.redirect(`/room/${room.slug}`);
@@ -156,6 +161,8 @@ async function authRoom(req, res) {
     if (!room_password && room.password != undefined && room.creator != user_id) {
         return res.status(400).send('Missing "room_password" parameter.');
     }
+
+    logger.info(`${display_name} ( ${user_id} ) is joining "${ room.name }"`);
 
     try {
         await room.join({ user_id, display_name }, room_password);
