@@ -1,13 +1,13 @@
+import config from 'config';
 import winston from 'winston';
 
-const debug = process.env.NODE_ENV !== 'production';
-
 const logger = winston.createLogger({
-    level: 'info',
+    level: config.APP_LOG_LEVEL,
     format: winston.format.json(),
-    transports: debug ? [
+    transports: config.DEBUG ? [
         new winston.transports.Console({ format: winston.format.simple() }),
     ] : [
+        new winston.transports.Console({ format: winston.format.simple() }),
         new winston.transports.File({ filename: 'out.log', format: winston.format.simple() })
     ]
 });

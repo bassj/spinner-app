@@ -3,4 +3,5 @@ dist/
 docs/
 coverage/
 *.swp
+out.log
 secrets/

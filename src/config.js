@@ -6,6 +6,7 @@ const baseConfig = {
     BCRYPT_SALT_ROUNDS: 10,
     TRUST_PROXY: false,
     DEBUG: debug,
+    APP_LOG_LEVEL: getEnv('APP_LOG_LEVEL') || 'info',
 };
 
 export default {
