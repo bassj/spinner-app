@@ -1,5 +1,3 @@
-import logger from 'logger';
-
 const debug = process.env.NODE_ENV != 'production';
 
 const baseConfig = {
@@ -40,15 +38,17 @@ function getConfig() {
  * @returns {string | undefined} The value of the environment variable. Or undefined.
  */
 function getEnv(envvar) {
-    return process.env[envvar];
+    return (envvar in process.env) ? process.env[envvar] : undefined;
 }
+
 
 /**
  * Prints an error message to our logger then exits.
  *
  * @param {string} message The message to print to stderr.
  */
-function panic(message) {
+async function panic(message) {
+    const logger = (await import('logger')).default;
     logger.error(message);
     process.exit(1);
 }

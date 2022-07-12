@@ -6,20 +6,20 @@ import csurf from 'csurf';
 import express from 'express';
 import http from 'http';
 import logger from 'logger';
+import memorystore from 'memorystore';
 import multer from 'multer';
 import session from 'express-session';
-import sessionMemoryStore from 'memorystore';
 
 import roomRouter from './routes/room.js';
 
-const MemoryStore = sessionMemoryStore(session);
+const MemoryStore = memorystore(session);
 
 const sessionMiddleware = session({
     secret: config.SECRET,
-    cookie: { secure: !config.DEBUG },
     store: new MemoryStore({
-        checkPeriod: 86400000 // prune expired entries every 24h
+        checkPeriod: 86400000
     }),
+    cookie: { secure: !config.DEBUG },
     saveUninitialized: false,
     resave: false,
 });
@@ -28,7 +28,6 @@ const app = express();
 const http_server = http.createServer(app);
 const io  = new Server();
 io.listen(http_server);
-
 
 const csrf = csurf({ cookie: true });
 

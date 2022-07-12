@@ -1,4 +1,4 @@
-name: Deploy
+name: Build & Deploy
 on:
   push:
     branches: [main]
@@ -7,7 +7,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to Digital Ocean
+      - name: Build & Deploy to Digital Ocean
         uses: appleboy/ssh-action@v0.1.4
         with:
           host: ${{ secrets.PROD_HOST }}

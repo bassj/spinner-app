@@ -43,6 +43,7 @@ function handleSocket(io) {
 
         sock.join(room.slug);
         broadcast('players', room.players);
+        logger.debug(`Players of "${ room.name }": ${JSON.stringify(room.players, null, 2)}`);
 
         if (room.controller) {
             const user = room.users.get(room.controller);
@@ -120,6 +121,8 @@ async function _createRoom(req, res) {
         creator
     });
 
+    logger.debug(JSON.stringify(room, null, 2));
+
     res.redirect(`/room/${room.slug}`);
 }
 
@@ -161,8 +164,6 @@ async function authRoom(req, res) {
     if (!room_password && room.password != undefined && room.creator != user_id) {
         return res.status(400).send('Missing "room_password" parameter.');
     }
-
-    logger.info(`${display_name} ( ${user_id} ) is joining "${ room.name }"`);
 
     try {
         await room.join({ user_id, display_name }, room_password);
