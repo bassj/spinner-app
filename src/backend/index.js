@@ -24,10 +24,20 @@ const sessionMiddleware = session({
     resave: false,
 });
 
+const socketSessionMiddleware =
+    (socket, next) => (sessionMiddleware(socket.request, socket.request.res || {}, next));
+
 const app = express();
 const http_server = http.createServer(app);
-const io  = new Server();
+const io  = new Server({
+    cors: {
+        origin: 'https://spin.bassj.io',
+        methods: ['GET', 'POST'],
+        credentials: true
+    }
+});
 io.listen(http_server);
+io.engine.on('connection_error', (err) => logger.error(err));
 
 const csrf = csurf({ cookie: true });
 
@@ -54,7 +64,7 @@ app.set('trust proxy', config.TRUST_PROXY? 1:0);
 
 app.set('view engine', 'ejs');
 
-app.use('/room', roomRouter(csrf, io, (socket, next) => (sessionMiddleware(socket.request, socket.request.res || {}, next))));
+app.use('/room', roomRouter(csrf, io, socketSessionMiddleware));
 
 app.get('/', csrf, (req, res) => {
     res.render('index', { csrfToken: req.csrfToken() });

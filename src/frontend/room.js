@@ -9,8 +9,8 @@ import {
     deleteImage,
     saveImage
 } from './util';
-
 import authDialog from './components/auth-dialog'; 
+import config from 'config';
 import playerList from './components/player-list';
 import roomTitle from './components/room-title';
 import settingsMenu from './components/settings-menu';
@@ -30,7 +30,10 @@ if (document.body.dataset.reconnect == 'true') {
  */
 function connectToRoom() {
     const user_id = document.body.dataset.userId;
-    const socket  = io(window.location.pathname);
+    const socket  = io(window.location.pathname, { 
+        // secure: !config.DEBUG,
+        rejectUnauthorized: false
+    });
 
     const onTick = () => {
         socket.emit('tick', {
