@@ -24,6 +24,14 @@ const sessionMiddleware = session({
     resave: false,
 });
 
+const requestLogger = (req, res, next) => {
+    res.on('finish', () => {
+        logger.info(`[${req.method}] ${req.originalUrl} ${res.statusCode}`);
+    });
+
+    next();
+};
+
 const socketSessionMiddleware =
     (socket, next) => (sessionMiddleware(socket.request, socket.request.res || {}, next));
 
@@ -41,6 +49,7 @@ io.engine.on('connection_error', (err) => logger.error(err));
 
 const csrf = csurf({ cookie: true });
 
+app.use(requestLogger);
 app.use('/js',  express.static('dist/frontend/js'));
 app.use('/css', express.static('dist/frontend/css'));
 app.use('/assets', express.static('assets'));
