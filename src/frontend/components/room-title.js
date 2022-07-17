@@ -32,9 +32,11 @@ class RoomTitle extends HTMLElement {
         // Move the mouse cursor to the last character.
         const range = document.createRange();
         range.setStart(this.#header.firstChild, this.#header.innerText.length + 1);
-        const set = window.getSelection();
-        set.removeAllRanges();
-        set.addRange(range);
+        const sel = window.getSelection();
+        if (sel.type === 'None') {
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
     }
 
     /**
