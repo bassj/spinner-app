@@ -4,6 +4,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import eslint from '@rollup/plugin-eslint';
 import json from '@rollup/plugin-json';
 import resolve from '@rollup/plugin-node-resolve';
+import injectProcessEnv from 'rollup-plugin-inject-process-env';
 
 import { terser } from 'rollup-plugin-terser';
 import scss from 'rollup-plugin-scss';
@@ -31,6 +32,7 @@ const frontend_plugins = [
     resolve({
         browser: true
     }),
+    injectProcessEnv(process.env),
     ...common_plugins
 ];
 

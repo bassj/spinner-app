@@ -3,12 +3,12 @@
 import './styles/spinner-styles.scss';
 import './styles/theme-styles.scss';
 
-import { io } from 'socket.io-client';
-
 import {
     deleteImage,
     saveImage
 } from './util';
+import { io } from 'socket.io-client';
+
 import authDialog from './components/auth-dialog'; 
 import config from 'config';
 import playerList from './components/player-list';
@@ -31,8 +31,7 @@ if (document.body.dataset.reconnect == 'true') {
 function connectToRoom() {
     const user_id = document.body.dataset.userId;
     const socket  = io(window.location.pathname, { 
-        // secure: !config.DEBUG,
-        rejectUnauthorized: false
+        secure: !config.DEBUG
     });
 
     const onTick = () => {
