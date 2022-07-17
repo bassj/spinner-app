@@ -2,7 +2,7 @@ const debug = process.env.NODE_ENV != 'production';
 
 const baseConfig = {
     BCRYPT_SALT_ROUNDS: 10,
-    TRUST_PROXY: false,
+    TRUST_PROXY: !debug,
     DEBUG: debug,
     APP_LOG_LEVEL: getEnv('APP_LOG_LEVEL') || 'info',
 };
