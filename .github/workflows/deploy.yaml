@@ -16,7 +16,8 @@ jobs:
           script: |
               cd /var/www/spinner-app
               echo "Updating source..."
-              git pull && echo "Done."
+              git fetch origin
+              git reset --hard origin/main && echo "Done."
               echo "Installing dependencies..."
               npm ci && echo "Done."
               echo "Running project build command..."
