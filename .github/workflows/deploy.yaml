@@ -19,7 +19,7 @@ jobs:
               git fetch origin
               git reset --hard origin/main && echo "Done."
               echo "Installing dependencies..."
-              npm ci && echo "Done."
+              npm install && echo "Done."
               echo "Running project build command..."
               npm run build && echo "Done."
               echo "Restarting spinner-app service"
