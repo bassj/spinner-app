@@ -26,6 +26,7 @@ spinner-wheel {
 }
 
 spinner-wheel svg {
+    user-select: none; 
     image, text {
         pointer-events: none;
         user-select: none;
