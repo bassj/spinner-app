@@ -5,6 +5,7 @@ const baseConfig = {
     TRUST_PROXY: !debug,
     DEBUG: debug,
     APP_LOG_LEVEL: getEnv('APP_LOG_LEVEL') || 'info',
+    VERSION: getEnv('npm_package_version') || 'dev',
 };
 
 export default {

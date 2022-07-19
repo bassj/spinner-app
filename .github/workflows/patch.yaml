@@ -1,0 +1,26 @@
+name: Patch
+on:
+  push:
+    branches: [dev]
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+          uses: actions/checkout@v2
+      - name: Set up Node.js
+          uses: actions/setup-node@v1
+          with:
+            node-version: 16.x
+      - name: Increment patch version
+        run: npm version patch
+      - name: Commit Changes
+          uses: EndBug/add-and-commit@v9
+		  with:
+			author_name: Jack Bass
+			author_email: jack@bassj.io
+			message: 'Incremented Patch Version'
+			add: '*' 
+ 
+
