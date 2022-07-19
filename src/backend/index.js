@@ -1,5 +1,5 @@
 import { Server } from 'socket.io';
-import config from 'src/config.js';
+import config from 'config';
 import cookieParser from 'cookie-parser';
 import crypto from 'crypto';
 import csurf from 'csurf';
@@ -76,7 +76,10 @@ app.set('view engine', 'ejs');
 app.use('/room', roomRouter(csrf, io, socketSessionMiddleware));
 
 app.get('/', csrf, (req, res) => {
-    res.render('index', { csrfToken: req.csrfToken() });
+    res.render('index', { 
+        csrfToken: req.csrfToken(),
+        version: config.VERSION
+    });
 });
 
 http_server.listen(config.PORT, () => {
